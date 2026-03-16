@@ -1228,9 +1228,19 @@ function deleteAdmin(email) {
   renderAccountList();
 }
 
-// ── Hidden admin access (click © in footer 5 times) ──────────────────────────
+// ── Hidden admin access ───────────────────────────────────────────────────────
+// 方法一：網址加 ?admin  → https://yoursite/?admin
+// 方法二：點頁尾隱藏區域 5 次
 let footerClickCount = 0;
 document.addEventListener('DOMContentLoaded', () => {
+  // 網址參數進入後台
+  if (window.location.search.includes('admin')) {
+    showPage('admin');
+    // 清除網址列的 ?admin，避免書籤外洩
+    history.replaceState(null, '', window.location.pathname);
+  }
+
+  // 頁尾隱藏觸發（點 5 次）
   const trigger = document.getElementById('adminAccessTrigger');
   if (trigger) {
     trigger.addEventListener('click', () => {
