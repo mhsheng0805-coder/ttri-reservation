@@ -335,6 +335,26 @@
     }
     footer strong { color: #fff; }
 
+    /* ── Cancel Modal ── */
+    .modal-overlay {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45);
+      z-index:9999; align-items:center; justify-content:center;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal-box {
+      background:#fff; border-radius:12px; padding:32px 28px;
+      width:100%; max-width:440px; box-shadow:0 8px 32px rgba(0,0,0,0.2);
+    }
+    .modal-box h3 { color:var(--primary); margin-bottom:6px; font-size:17px; }
+    .modal-box p  { color:var(--text-muted); font-size:13px; margin-bottom:16px; }
+    .modal-box textarea {
+      width:100%; border:1px solid var(--border); border-radius:8px;
+      padding:10px 12px; font-size:14px; font-family:inherit;
+      resize:vertical; min-height:90px; box-sizing:border-box;
+    }
+    .modal-box textarea:focus { outline:none; border-color:var(--primary); }
+    .modal-btns { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+
     /* ── Alert ── */
     .alert {
       padding: 12px 18px; border-radius: 8px; font-size: 13.5px;
@@ -791,6 +811,20 @@
   </div>
 
 </main>
+
+<!-- ── 取消原因 Modal ── -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal-box">
+    <h3>❌ 取消預約</h3>
+    <p>請填寫取消原因（將自動帶入通知信）</p>
+    <textarea id="cancelReasonInput" placeholder="例如：場地維護、活動衝突、申請單位主動取消…"></textarea>
+    <div id="cancelReasonErr" style="color:#c0392b;font-size:12px;margin-top:4px;"></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeCancelModal()">返回</button>
+      <button class="btn btn-danger"    onclick="confirmCancel()">確定取消並通知</button>
+    </div>
+  </div>
+</div>
 
 <footer>
   <strong>財團法人紡織產業綜合研究所 · 紡織印象館</strong><br>
@@ -1340,10 +1374,36 @@ function confirmReservation(ref) {
   sendNotifyEmail(ref);
 }
 
+let _cancelRef = null;
 function cancelReservation(ref) {
-  if (!confirm('確定取消此預約？\n系統將開啟 Email 通知申請者。')) return;
-  updateStatus(ref, 'cancelled');
-  sendNotifyEmail(ref);
+  _cancelRef = ref;
+  document.getElementById('cancelReasonInput').value = '';
+  document.getElementById('cancelReasonErr').textContent = '';
+  document.getElementById('cancelModal').classList.add('open');
+}
+function closeCancelModal() {
+  _cancelRef = null;
+  document.getElementById('cancelModal').classList.remove('open');
+}
+function confirmCancel() {
+  const reason = document.getElementById('cancelReasonInput').value.trim();
+  if (!reason) {
+    document.getElementById('cancelReasonErr').textContent = '請填寫取消原因';
+    return;
+  }
+  // 儲存取消原因
+  const all = getReservations();
+  const idx = all.findIndex(r => r.ref === _cancelRef);
+  if (idx !== -1) {
+    all[idx].status = 'cancelled';
+    all[idx].cancelReason = reason;
+    all[idx].cancelledAt = new Date().toISOString();
+    saveReservations(all);
+    renderAdminStats();
+    renderAdminTable();
+  }
+  closeCancelModal();
+  sendNotifyEmail(_cancelRef);
 }
 
 function sendNotifyEmail(ref) {
@@ -1393,7 +1453,7 @@ E-Mail：mhsheng.0805@ttri.org.tw
   參觀日期：${dateDisplay}
   參觀時段：${rec.slotLabel}
   參觀人數：${rec.count} 人
-──────────────────────────
+${rec.cancelReason ? `\n▍取消原因\n  ${rec.cancelReason}\n` : ''}──────────────────────────
 
 如需重新安排參訪，歡迎再次透過系統預約，或直接與我們聯絡。
 
@@ -1444,6 +1504,7 @@ function exportExcel() {
     '參觀目的': r.purpose,
     '備註': r.notes || '',
     '狀態': statusMap[r.status] || r.status,
+    '取消原因': r.cancelReason || '',
     '申請時間': new Date(r.createdAt).toLocaleString('zh-TW')
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
@@ -1460,7 +1521,9 @@ function viewDetail(ref) {
   const rec = getReservations().find(r => r.ref === ref);
   if (!rec) return;
   const dateDisplay = rec.date.replace(/-/g, '/');
-  alert(`【預約詳細資料】\n\n預約編號：${rec.ref}\n申請單位：${rec.org}\n聯絡人：${rec.name}\n電話：${rec.tel}\nEmail：${rec.email}\n參觀日期：${dateDisplay}\n時段：${rec.slotLabel}\n人數：${rec.count} 人\n參觀目的：${rec.purpose}\n備註：${rec.notes || '（無）'}\n狀態：${rec.status}\n申請時間：${new Date(rec.createdAt).toLocaleString('zh-TW')}`);
+  const statusMap2 = { pending:'待確認', confirmed:'已確認', cancelled:'已取消' };
+  const cancelInfo = rec.cancelReason ? `\n取消原因：${rec.cancelReason}` : '';
+  alert(`【預約詳細資料】\n\n預約編號：${rec.ref}\n申請單位：${rec.org}\n聯絡人：${rec.name}\n電話：${rec.tel}\nEmail：${rec.email}\n參觀日期：${dateDisplay}\n時段：${rec.slotLabel}\n人數：${rec.count} 人\n參觀目的：${rec.purpose}\n備註：${rec.notes || '（無）'}\n狀態：${statusMap2[rec.status]||rec.status}${cancelInfo}\n申請時間：${new Date(rec.createdAt).toLocaleString('zh-TW')}`);
 }
 
 function exportCSV() {
