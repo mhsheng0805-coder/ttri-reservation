@@ -719,16 +719,10 @@
         <div style="font-size:40px;margin-bottom:12px;">🔐</div>
         <h2>管理後台登入</h2>
         <div class="form-group" style="margin-bottom:12px;">
-          <label>管理員帳號（Email）</label>
-          <!-- 用 contenteditable div 取代 input，Chrome 不會對此顯示自動填入 -->
-          <div id="admin-email-div" contenteditable="true"
-            style="border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:15px;
-                   min-height:42px;outline:none;background:#fff;color:var(--text);font-family:inherit;"
-            data-placeholder="請輸入帳號"
-            onfocus="this.style.borderColor='var(--primary)'"
-            onblur="this.style.borderColor='var(--border)'"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();adminLogin()}"
-          ></div>
+          <label>管理員帳號</label>
+          <input type="text" id="admin-email-div" placeholder="請輸入帳號"
+            autocomplete="off" spellcheck="false"
+            onkeydown="if(event.key==='Enter')adminLogin()">
         </div>
         <div class="form-group" style="margin-bottom:16px;">
           <label>密碼</label>
@@ -804,8 +798,8 @@
               <input type="text" id="new-admin-name" placeholder="請輸入姓名">
             </div>
             <div class="form-group">
-              <label>帳號（Email）</label>
-              <input type="email" id="new-admin-email" placeholder="example@ttri.org.tw">
+              <label>帳號</label>
+              <input type="text" id="new-admin-email" placeholder="請輸入帳號（英數字）" autocomplete="off">
             </div>
             <div class="form-group">
               <label>密碼</label>
@@ -1203,19 +1197,22 @@ function getAdmins() {
 function saveAdmins(arr) { localStorage.setItem(ADMIN_KEY, JSON.stringify(arr)); }
 
 function initAdminAccounts() {
-  if (!getAdmins().length) {
+  const admins = getAdmins();
+  // 若無帳號，或仍是舊版 Email 帳號，重設為新帳號
+  const hasNew = admins.some(a => a.email === 'ttri1959');
+  if (!admins.length || !hasNew) {
+    const others = admins.filter(a => a.email !== 'service@ttri.org.tw' && a.email !== 'ttri1959');
     saveAdmins([{
-      email: 'service@ttri.org.tw',
+      email: 'ttri1959',
       hash: simpleHash('Ttri01891206@'),
       name: '系統管理員',
       createdAt: new Date().toISOString()
-    }]);
+    }, ...others]);
   }
 }
 
 function adminLogin() {
-  const emailDiv = document.getElementById('admin-email-div');
-  const email = (emailDiv ? emailDiv.innerText : '').trim().toLowerCase();
+  const email = document.getElementById('admin-email-div').value.trim().toLowerCase();
   const pw    = document.getElementById('admin-pw').value;
   const admins = getAdmins();
   const found  = admins.find(a => a.email.toLowerCase() === email && a.hash === simpleHash(pw));
@@ -1237,7 +1234,7 @@ function adminLogout() {
   currentAdminEmail = '';
   document.getElementById('admin-panel').style.display = 'none';
   document.getElementById('admin-login-area').style.display = 'block';
-  document.getElementById('admin-email-div').innerText = '';
+  document.getElementById('admin-email-div').value = '';
   document.getElementById('admin-pw').value = '';
   document.getElementById('admin-login-err').textContent = '';
 }
@@ -1257,7 +1254,7 @@ function renderAccountList() {
   const el = document.getElementById('account-list');
   if (!admins.length) { el.innerHTML = '<p style="color:var(--text-muted);padding:16px;">尚無管理員帳號。</p>'; return; }
   el.innerHTML = `<table class="admin-table" style="margin-top:8px;">
-    <thead><tr><th>姓名</th><th>帳號（Email）</th><th>建立時間</th><th>操作</th></tr></thead>
+    <thead><tr><th>姓名</th><th>帳號</th><th>建立時間</th><th>操作</th></tr></thead>
     <tbody>${admins.map(a => `
       <tr>
         <td>${a.name}</td>
@@ -1283,7 +1280,8 @@ function addAdminAccount() {
   const pass2 = document.getElementById('new-admin-pass2').value;
   const err   = document.getElementById('add-account-err');
   if (!name)              { err.textContent = '請輸入姓名。'; return; }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = '請輸入有效的 Email。'; return; }
+  if (!email || email.length < 3) { err.textContent = '請輸入帳號（至少3個字元）。'; return; }
+  if (!/^[a-zA-Z0-9_@.\-]+$/.test(email)) { err.textContent = '帳號只能使用英文、數字及底線。'; return; }
   if (pass.length < 8)    { err.textContent = '密碼至少需要 8 個字元。'; return; }
   if (pass !== pass2)     { err.textContent = '兩次密碼不一致。'; return; }
   const admins = getAdmins();
