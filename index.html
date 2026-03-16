@@ -711,13 +711,20 @@
       <div class="admin-login">
         <div style="font-size:40px;margin-bottom:12px;">🔐</div>
         <h2>管理後台登入</h2>
+        <!-- 假欄位：阻止 Chrome 自動填入 -->
+        <input type="text" style="display:none;" aria-hidden="true">
+        <input type="password" style="display:none;" aria-hidden="true">
         <div class="form-group" style="margin-bottom:12px;">
           <label>管理員帳號（Email）</label>
-          <input type="email" id="admin-email" placeholder="請輸入帳號" autocomplete="off" onkeydown="if(event.key==='Enter')adminLogin()">
+          <input type="text" id="admin-email" placeholder="請輸入帳號" autocomplete="off" readonly
+            onfocus="this.removeAttribute('readonly')"
+            onkeydown="if(event.key==='Enter')adminLogin()">
         </div>
         <div class="form-group" style="margin-bottom:16px;">
           <label>密碼</label>
-          <input type="password" id="admin-pw" placeholder="請輸入密碼" autocomplete="new-password" onkeydown="if(event.key==='Enter')adminLogin()">
+          <input type="password" id="admin-pw" placeholder="請輸入密碼" autocomplete="off" readonly
+            onfocus="this.removeAttribute('readonly')"
+            onkeydown="if(event.key==='Enter')adminLogin()">
         </div>
         <button class="btn btn-primary" onclick="adminLogin()" style="width:100%;">登入</button>
         <div id="admin-login-err" class="field-error" style="margin-top:10px;text-align:center;"></div>
