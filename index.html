@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>財團法人紡織產業綜合研究所 · 紡織印象館線上參訪預約</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
       --primary: #1B4B8A;
@@ -300,6 +301,22 @@
       margin-bottom: 16px; flex-wrap: wrap;
     }
     .admin-filter select { padding: 7px 12px; font-size: 13px; }
+    .status-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .status-pending  { background: #fff3cd; color: #856404; }
+    .status-confirmed { background: #d1e7dd; color: #0a3622; }
+    .status-cancelled { background: #f8d7da; color: #58151c; }
+    .action-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+    .btn-confirm { background:#198754;color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer; }
+    .btn-confirm:hover { background:#157347; }
+    .btn-reject  { background:#dc3545;color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer; }
+    .btn-reject:hover  { background:#b02a37; }
+    .btn-notify  { background:#0d6efd;color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer; }
+    .btn-notify:hover  { background:#0b5ed7; }
+    .btn-detail  { background:#6c757d;color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer; }
+    .btn-detail:hover  { background:#565e64; }
     .admin-stats {
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;
     }
@@ -717,6 +734,7 @@
               </select>
             </div>
             <input type="text" id="admin-search" placeholder="搜尋單位/聯絡人..." oninput="renderAdminTable()" style="flex:1;max-width:240px;">
+            <button class="btn btn-secondary" onclick="exportExcel()">📊 匯出 Excel</button>
             <button class="btn btn-secondary" onclick="exportCSV()">匯出 CSV</button>
             <button class="btn btn-danger" onclick="clearAll()" style="margin-left:auto;">清除所有資料</button>
           </div>
@@ -725,7 +743,7 @@
               <thead>
                 <tr>
                   <th>預約編號</th><th>申請單位</th><th>聯絡人</th><th>電話</th>
-                  <th>參觀日期</th><th>時段</th><th>人數</th><th>狀態</th><th>操作</th>
+                  <th>參觀日期</th><th>時段</th><th>人數</th><th>狀態</th><th>審核 / 通知</th>
                 </tr>
               </thead>
               <tbody id="adminTableBody"></tbody>
@@ -1285,10 +1303,8 @@ function renderAdminTable() {
     tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:24px;">無資料</td></tr>';
     return;
   }
+  const statusLabel = { pending:'待確認', confirmed:'已確認', cancelled:'已取消' };
   tbody.innerHTML = all.map(r => {
-    const statusOpts = ['pending','confirmed','cancelled'].map(s =>
-      `<option value="${s}" ${r.status === s ? 'selected' : ''}>${{pending:'待確認',confirmed:'已確認',cancelled:'已取消'}[s]}</option>`
-    ).join('');
     return `<tr>
       <td style="font-size:11px;letter-spacing:0.5px">${r.ref}</td>
       <td>${r.org}</td>
@@ -1297,13 +1313,14 @@ function renderAdminTable() {
       <td>${r.date}</td>
       <td>${r.slot === 'morning' ? '上午' : '下午'}</td>
       <td>${r.count}</td>
+      <td><span class="status-badge status-${r.status}">${statusLabel[r.status]||r.status}</span></td>
       <td>
-        <select style="font-size:12px;padding:4px 8px;" onchange="updateStatus('${r.ref}',this.value)">
-          ${statusOpts}
-        </select>
-      </td>
-      <td>
-        <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px;" onclick="viewDetail('${r.ref}')">詳細</button>
+        <div class="action-btns">
+          ${r.status !== 'confirmed' ? `<button class="btn-confirm" onclick="confirmReservation('${r.ref}')">✅ 確認</button>` : ''}
+          ${r.status !== 'cancelled' ? `<button class="btn-reject"  onclick="cancelReservation('${r.ref}')">❌ 取消</button>` : ''}
+          <button class="btn-notify" onclick="sendNotifyEmail('${r.ref}')">📧 通知</button>
+          <button class="btn-detail" onclick="viewDetail('${r.ref}')">詳細</button>
+        </div>
       </td>
     </tr>`;
   }).join('');
@@ -1316,7 +1333,130 @@ function updateStatus(ref, status) {
     all[idx].status = status;
     saveReservations(all);
     renderAdminStats();
+    renderAdminTable();
   }
+}
+
+function confirmReservation(ref) {
+  if (!confirm('確認此預約申請？\n系統將開啟 Email 通知申請者。')) return;
+  updateStatus(ref, 'confirmed');
+  sendNotifyEmail(ref);
+}
+
+function cancelReservation(ref) {
+  if (!confirm('確定取消此預約？\n系統將開啟 Email 通知申請者。')) return;
+  updateStatus(ref, 'cancelled');
+  sendNotifyEmail(ref);
+}
+
+function sendNotifyEmail(ref) {
+  const rec = getReservations().find(r => r.ref === ref);
+  if (!rec) return;
+  const statusMap = { confirmed:'已確認', cancelled:'已取消', pending:'待確認' };
+  const statusLabel = statusMap[rec.status] || rec.status;
+  const dateDisplay = rec.date.replace(/-/g,'/');
+
+  let subject, body;
+  if (rec.status === 'confirmed') {
+    subject = `【紡織印象館】參訪預約確認通知 – 編號 ${rec.ref}`;
+    body =
+`親愛的 ${rec.name} 您好，
+
+感謝您申請紡織印象館參訪預約，您的預約已【確認】。
+
+──────────────────────────
+▍預約資訊
+  預約編號：${rec.ref}
+  申請單位：${rec.org}
+  聯絡人　：${rec.name}
+  參觀日期：${dateDisplay}（${rec.slot === 'morning' ? '星期' + '一二三四五六日'[new Date(rec.date).getDay()] : '星期' + '一二三四五六日'[new Date(rec.date).getDay()]}）
+  參觀時段：${rec.slotLabel}
+  參觀人數：${rec.count} 人
+──────────────────────────
+
+請於預約當日準時抵達，若有任何問題歡迎與我們聯絡。
+
+承辦人：尚小姐
+電　話：02-22670321 分機 6003
+E-Mail：mhsheng.0805@ttri.org.tw
+
+財團法人紡織產業綜合研究所 · 紡織印象館`;
+  } else if (rec.status === 'cancelled') {
+    subject = `【紡織印象館】參訪預約取消通知 – 編號 ${rec.ref}`;
+    body =
+`親愛的 ${rec.name} 您好，
+
+很抱歉通知您，您的紡織印象館參訪預約已【取消】。
+
+──────────────────────────
+▍預約資訊
+  預約編號：${rec.ref}
+  申請單位：${rec.org}
+  聯絡人　：${rec.name}
+  參觀日期：${dateDisplay}
+  參觀時段：${rec.slotLabel}
+  參觀人數：${rec.count} 人
+──────────────────────────
+
+如需重新安排參訪，歡迎再次透過系統預約，或直接與我們聯絡。
+
+承辦人：尚小姐
+電　話：02-22670321 分機 6003
+E-Mail：mhsheng.0805@ttri.org.tw
+
+財團法人紡織產業綜合研究所 · 紡織印象館`;
+  } else {
+    subject = `【紡織印象館】參訪預約通知 – 編號 ${rec.ref}`;
+    body =
+`親愛的 ${rec.name} 您好，
+
+您的紡織印象館參訪預約狀態為【${statusLabel}】。
+
+──────────────────────────
+  預約編號：${rec.ref}
+  申請單位：${rec.org}
+  參觀日期：${dateDisplay}
+  參觀時段：${rec.slotLabel}
+  參觀人數：${rec.count} 人
+──────────────────────────
+
+承辦人：尚小姐
+電　話：02-22670321 分機 6003
+E-Mail：mhsheng.0805@ttri.org.tw
+
+財團法人紡織產業綜合研究所 · 紡織印象館`;
+  }
+
+  const mailto = `mailto:${rec.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.open(mailto);
+}
+
+function exportExcel() {
+  const all = getReservations();
+  if (!all.length) { alert('目前無資料可匯出。'); return; }
+  const statusMap = { pending:'待確認', confirmed:'已確認', cancelled:'已取消' };
+  const rows = all.map(r => ({
+    '預約編號': r.ref,
+    '申請單位': r.org,
+    '聯絡人': r.name,
+    '電話': r.tel,
+    'Email': r.email,
+    '參觀日期': r.date,
+    '時段': r.slot === 'morning' ? '上午 09:30–12:00' : '下午 13:30–16:30',
+    '人數': Number(r.count),
+    '參觀目的': r.purpose,
+    '備註': r.notes || '',
+    '狀態': statusMap[r.status] || r.status,
+    '申請時間': new Date(r.createdAt).toLocaleString('zh-TW')
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [
+    {wch:16},{wch:20},{wch:10},{wch:14},{wch:26},
+    {wch:12},{wch:18},{wch:6},{wch:20},{wch:16},{wch:8},{wch:18}
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '預約清單');
+  XLSX.writeFile(wb, `紡織印象館預約清單_${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
 function viewDetail(ref) {
