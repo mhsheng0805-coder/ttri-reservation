@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>財團法人紡織產業綜合研究所 · 紡織印象館線上參訪預約</title>
+  <style>
+    :root {
+      --primary: #1B4B8A;
+      --primary-dark: #0f2d5c;
+      --primary-light: #2e6ab8;
+      --accent: #E8850A;
+      --accent-light: #f5a623;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1a1a2e;
+      --text-muted: #5a6a7e;
+      --border: #d0dbe8;
+      --success: #1e8a5e;
+      --success-bg: #e8f7f0;
+      --error: #c0392b;
+      --error-bg: #fdf0ef;
+      --warning: #d68910;
+      --warning-bg: #fef9e7;
+      --radius: 10px;
+      --shadow: 0 2px 16px rgba(27,75,138,0.10);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: var(--primary-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, var(--primary-light) 100%);
+      color: #fff;
+      padding: 0 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 68px;
+    }
+    .logo { display: flex; align-items: center; gap: 14px; }
+    .logo-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .logo-text { line-height: 1.25; }
+    .logo-text .org { font-size: 11px; opacity: 0.85; letter-spacing: 0.5px; }
+    .logo-text .name { font-size: 17px; font-weight: 700; letter-spacing: 1px; }
+    nav { display: flex; gap: 4px; }
+    .nav-btn {
+      background: none; border: none; color: rgba(255,255,255,0.85);
+      font-size: 14px; padding: 8px 14px; border-radius: 7px; cursor: pointer;
+      font-family: inherit; transition: all .2s;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    .nav-btn.active { background: rgba(255,255,255,0.22); color: #fff; font-weight: 600; }
+
+    /* ── Main ── */
+    main { flex: 1; max-width: 1100px; margin: 32px auto; padding: 0 20px; width: 100%; }
+    .page { display: none; animation: fadeIn .3s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 28px 32px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 20px; font-weight: 700; color: var(--primary);
+      margin-bottom: 18px; padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .card-title .icon { font-size: 22px; }
+
+    /* ── Home ── */
+    .hero {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: #fff; border-radius: var(--radius);
+      padding: 48px 40px; margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '🧵';
+      position: absolute; right: 40px; top: 20px;
+      font-size: 100px; opacity: 0.12;
+    }
+    .hero h1 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+    .hero p { font-size: 15px; line-height: 1.8; opacity: 0.9; max-width: 600px; }
+    .hero-btn {
+      display: inline-block; margin-top: 24px;
+      background: var(--accent); color: #fff;
+      padding: 12px 28px; border-radius: 8px;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+      border: none; font-family: inherit;
+      transition: background .2s; box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    }
+    .hero-btn:hover { background: #c4720a; }
+    .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .info-card {
+      background: var(--card); border-radius: var(--radius); padding: 20px 22px;
+      box-shadow: var(--shadow); border-left: 4px solid var(--primary);
+    }
+    .info-card .ic-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+    .info-card .ic-value { font-size: 15px; font-weight: 700; color: var(--primary); }
+
+    /* ── Rules ── */
+    .rule-section { margin-bottom: 24px; }
+    .rule-section h3 {
+      font-size: 16px; font-weight: 700; color: var(--primary);
+      margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+    }
+    ol.rule-list, ul.rule-list { padding-left: 22px; }
+    ol.rule-list li, ul.rule-list li {
+      font-size: 14px; line-height: 1.9; color: var(--text);
+      margin-bottom: 4px;
+    }
+    .highlight-box {
+      background: var(--warning-bg); border-left: 4px solid var(--warning);
+      border-radius: 8px; padding: 14px 18px; margin: 12px 0;
+      font-size: 14px; color: #7d6008; line-height: 1.7;
+    }
+
+    /* ── Privacy ── */
+    .privacy-box {
+      background: #f0f4fa; border: 1px solid var(--border);
+      border-radius: 8px; padding: 20px 24px; font-size: 13.5px;
+      line-height: 2; color: var(--text);
+    }
+    .privacy-box p { margin-bottom: 8px; }
+
+    /* ── Form ── */
+    .steps {
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 28px; gap: 0;
+    }
+    .step {
+      display: flex; flex-direction: column; align-items: center;
+      flex: 1; max-width: 200px;
+    }
+    .step-circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700;
+      background: var(--border); color: var(--text-muted);
+      transition: all .3s; position: relative; z-index: 1;
+    }
+    .step.done .step-circle { background: var(--success); color: #fff; }
+    .step.active .step-circle { background: var(--primary); color: #fff; box-shadow: 0 0 0 4px rgba(27,75,138,0.2); }
+    .step-label { font-size: 12px; margin-top: 6px; color: var(--text-muted); text-align: center; }
+    .step.active .step-label { color: var(--primary); font-weight: 600; }
+    .step-line { flex: 1; height: 2px; background: var(--border); margin-top: -20px; }
+    .step-line.done { background: var(--success); }
+
+    .form-step { display: none; }
+    .form-step.active { display: block; animation: fadeIn .3s ease; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 13px; font-weight: 600; color: var(--text); }
+    label .req { color: var(--error); margin-left: 3px; }
+    input, select, textarea {
+      border: 1.5px solid var(--border); border-radius: 7px;
+      padding: 10px 14px; font-size: 14px; font-family: inherit;
+      color: var(--text); background: #fff;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(27,75,138,0.12);
+    }
+    input.error, select.error, textarea.error {
+      border-color: var(--error);
+      box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
+    }
+    .field-error { font-size: 12px; color: var(--error); margin-top: 3px; }
+    textarea { resize: vertical; min-height: 90px; }
+    .hint { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+    .time-slots { display: flex; gap: 12px; }
+    .slot-btn {
+      flex: 1; padding: 14px; border: 2px solid var(--border);
+      border-radius: 8px; background: #fff; cursor: pointer;
+      font-family: inherit; font-size: 14px; color: var(--text);
+      transition: all .2s; text-align: center;
+    }
+    .slot-btn:hover { border-color: var(--primary-light); background: #f0f4fa; }
+    .slot-btn.selected { border-color: var(--primary); background: #ebf2fd; color: var(--primary); font-weight: 700; }
+    .slot-btn .slot-time { font-size: 13px; color: var(--text-muted); display: block; margin-top: 3px; }
+    .slot-btn.selected .slot-time { color: var(--primary-light); }
+    .slot-btn.full { opacity: 0.5; cursor: not-allowed; background: #f5f5f5; }
+
+    .checkbox-group { display: flex; align-items: flex-start; gap: 10px; }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px; height: 18px; margin-top: 2px; cursor: pointer;
+      accent-color: var(--primary); flex-shrink: 0;
+    }
+    .checkbox-group label { font-size: 13.5px; font-weight: 400; line-height: 1.7; cursor: pointer; }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+    .btn {
+      padding: 11px 26px; border-radius: 8px; border: none;
+      font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+      transition: all .2s;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary {
+      background: #fff; color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+    .btn-secondary:hover { background: #ebf2fd; }
+    .btn-accent { background: var(--accent); color: #fff; }
+    .btn-accent:hover { background: #c4720a; }
+    .btn-danger { background: var(--error); color: #fff; }
+    .btn-danger:hover { background: #a93226; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Confirmation ── */
+    .confirm-box {
+      background: var(--success-bg); border: 2px solid var(--success);
+      border-radius: var(--radius); padding: 32px; text-align: center;
+      margin-bottom: 20px;
+    }
+    .confirm-box .icon { font-size: 48px; margin-bottom: 12px; }
+    .confirm-box h2 { color: var(--success); font-size: 24px; margin-bottom: 8px; }
+    .confirm-box .ref { font-size: 15px; color: var(--text-muted); }
+    .confirm-box .ref-no {
+      font-size: 28px; font-weight: 800; color: var(--primary);
+      letter-spacing: 3px; margin: 12px 0;
+    }
+    .confirm-details {
+      background: var(--card); border-radius: var(--radius); padding: 24px;
+      box-shadow: var(--shadow);
+    }
+    .confirm-details table { width: 100%; border-collapse: collapse; }
+    .confirm-details td {
+      padding: 10px 14px; font-size: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .confirm-details td:first-child { color: var(--text-muted); width: 140px; font-weight: 600; }
+
+    /* ── Query ── */
+    .query-form { display: flex; gap: 12px; align-items: flex-end; }
+    .query-form .form-group { flex: 1; }
+    .reservation-list { margin-top: 24px; }
+    .reservation-item {
+      background: var(--card); border-radius: var(--radius);
+      padding: 20px 24px; margin-bottom: 14px;
+      box-shadow: var(--shadow); border-left: 4px solid var(--primary);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .reservation-item.cancelled { border-left-color: var(--error); opacity: 0.7; }
+    .reservation-item .ri-info .ref { font-size: 12px; color: var(--text-muted); }
+    .reservation-item .ri-info .name { font-size: 16px; font-weight: 700; margin: 4px 0; }
+    .reservation-item .ri-info .detail { font-size: 13px; color: var(--text-muted); }
+    .status-badge {
+      display: inline-block; padding: 4px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+    }
+    .status-pending { background: var(--warning-bg); color: var(--warning); }
+    .status-confirmed { background: var(--success-bg); color: var(--success); }
+    .status-cancelled { background: #fdf0ef; color: var(--error); }
+
+    /* ── Admin ── */
+    .admin-login {
+      max-width: 400px; margin: 40px auto;
+      background: var(--card); border-radius: var(--radius);
+      padding: 36px; box-shadow: var(--shadow); text-align: center;
+    }
+    .admin-login h2 { color: var(--primary); margin-bottom: 20px; font-size: 20px; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .admin-table th {
+      background: var(--primary); color: #fff;
+      padding: 10px 12px; text-align: left; font-size: 12px;
+    }
+    .admin-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .admin-table tr:hover td { background: var(--bg); }
+    .admin-toolbar {
+      display: flex; gap: 12px; align-items: center;
+      margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .admin-filter select { padding: 7px 12px; font-size: 13px; }
+    .admin-stats {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--card); border-radius: var(--radius); padding: 16px 20px;
+      box-shadow: var(--shadow); text-align: center;
+    }
+    .stat-card .num { font-size: 28px; font-weight: 800; color: var(--primary); }
+    .stat-card .lbl { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--primary-dark); color: rgba(255,255,255,0.75);
+      text-align: center; padding: 20px;
+      font-size: 13px; line-height: 1.8; margin-top: auto;
+    }
+    footer strong { color: #fff; }
+
+    /* ── Alert ── */
+    .alert {
+      padding: 12px 18px; border-radius: 8px; font-size: 13.5px;
+      margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px;
+    }
+    .alert-warning { background: var(--warning-bg); color: #7d6008; border: 1px solid #f0d060; }
+    .alert-success { background: var(--success-bg); color: #145a3a; border: 1px solid #a3d9be; }
+    .alert-error { background: var(--error-bg); color: #922b21; border: 1px solid #f1948a; }
+    .alert-info { background: #ebf3fd; color: #154360; border: 1px solid #aed6f1; }
+
+    /* ── Responsive ── */
+    @media (max-width: 760px) {
+      .info-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: 1; }
+      .admin-stats { grid-template-columns: 1fr 1fr; }
+      nav { display: none; }
+      .hero { padding: 28px 20px; }
+      .hero h1 { font-size: 22px; }
+      .card { padding: 20px; }
+    }
+    @media print {
+      header, nav, footer, .btn-row { display: none !important; }
+      .card { box-shadow: none; border: 1px solid #ccc; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🧵</div>
+      <div class="logo-text">
+        <div class="org">財團法人紡織產業綜合研究所</div>
+        <div class="name">紡織印象館 線上參訪預約</div>
+      </div>
+    </div>
+    <nav id="mainNav">
+      <button class="nav-btn active" onclick="showPage('home')">首頁</button>
+      <button class="nav-btn" onclick="showPage('rules')">預約說明</button>
+      <button class="nav-btn" onclick="showPage('reserve')">立即預約</button>
+      <button class="nav-btn" onclick="showPage('query')">查詢預約</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ═══════════════════════════════════════ HOME ═══════════════════════════════════════ -->
+  <div id="page-home" class="page active">
+    <div class="hero">
+      <h1>歡迎蒞臨紡織印象館</h1>
+      <p>紡織印象館提供團體參訪預約服務，透過線上預約系統，讓您輕鬆完成申請，暢遊台灣紡織產業的精彩世界。</p>
+      <button class="hero-btn" onclick="showPage('reserve')">立即線上預約 →</button>
+    </div>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-label">📅 開放時段</div>
+        <div class="ic-value">週一至週五</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">
+          上午 09:30–12:00<br>下午 13:30–16:30
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="ic-label">👥 參觀人數</div>
+        <div class="ic-value">以團體參觀為主</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">
+          每次參觀以 2 小時為上限
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="ic-label">📞 聯絡窗口</div>
+        <div class="ic-value">尚小姐</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">
+          02-22670321 分機 6003<br>mhsheng.0805@ttri.org.tw
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="icon">📋</span>預約流程</div>
+      <div style="display:flex;gap:0;align-items:flex-start;flex-wrap:wrap;">
+        <div style="flex:1;min-width:160px;text-align:center;padding:12px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 10px;">1</div>
+          <div style="font-weight:700;margin-bottom:4px;">閱讀預約說明</div>
+          <div style="font-size:13px;color:var(--text-muted);">確認開放時間與注意事項</div>
+        </div>
+        <div style="flex:0;padding-top:30px;font-size:22px;color:var(--border);">›</div>
+        <div style="flex:1;min-width:160px;text-align:center;padding:12px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 10px;">2</div>
+          <div style="font-weight:700;margin-bottom:4px;">同意個資聲明</div>
+          <div style="font-size:13px;color:var(--text-muted);">確認個人資料使用說明</div>
+        </div>
+        <div style="flex:0;padding-top:30px;font-size:22px;color:var(--border);">›</div>
+        <div style="flex:1;min-width:160px;text-align:center;padding:12px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 10px;">3</div>
+          <div style="font-weight:700;margin-bottom:4px;">填寫預約資料</div>
+          <div style="font-size:13px;color:var(--text-muted);">選擇日期、時段並填寫資料</div>
+        </div>
+        <div style="flex:0;padding-top:30px;font-size:22px;color:var(--border);">›</div>
+        <div style="flex:1;min-width:160px;text-align:center;padding:12px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 10px;">4</div>
+          <div style="font-weight:700;margin-bottom:4px;">完成預約</div>
+          <div style="font-size:13px;color:var(--text-muted);">獲取預約編號，靜待確認</div>
+        </div>
+      </div>
+    </div>
+    <div class="alert alert-warning">
+      ⚠️ <span>如參觀日遇政府發布颱風警報、補假日或調整放假日均暫停辦理，請留意氣象公告。</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ RULES ═══════════════════════════════════════ -->
+  <div id="page-rules" class="page">
+    <div class="card">
+      <div class="card-title"><span class="icon">📌</span>預約方式與規定</div>
+      <div class="rule-section">
+        <h3>① 開放時間</h3>
+        <ul class="rule-list">
+          <li>週一至週五：上午時段 <strong>09:30–12:00</strong>、下午時段 <strong>13:30–16:30</strong></li>
+          <li>每次參觀以 <strong>2 小時</strong>為上限</li>
+        </ul>
+      </div>
+      <div class="rule-section">
+        <h3>② 參觀對象與人數</h3>
+        <ul class="rule-list">
+          <li>以團體參觀為主</li>
+          <li>因展示室空間有限，請依實際人數填寫</li>
+        </ul>
+      </div>
+      <div class="rule-section">
+        <h3>③ 預約方式</h3>
+        <ul class="rule-list">
+          <li>請於預定參觀日期 <strong>2 週前</strong>進行線上填寫「紡織所印象館」預約參訪申請單</li>
+          <li>或下載申請表傳真至 <strong>02-2268-9834</strong></li>
+          <li>或 E-MAIL 寄至 <a href="mailto:mhsheng.0805@ttri.org.tw">mhsheng.0805@ttri.org.tw</a></li>
+          <li>系統開放預約參觀日期，以申請日之後 <strong>2 個月內</strong>為限</li>
+        </ul>
+      </div>
+      <div class="rule-section">
+        <h3>④ 確認與取消</h3>
+        <ul class="rule-list">
+          <li>如於預定參觀日前 1 週還未收到電子郵件通知預約成功，請來電洽詢</li>
+          <li>若需取消預約，請於 <strong>2 日前</strong>主動來電告知，以免影響其他參觀團體權益</li>
+          <li>違反上述規定之團體，將暫停其登記參觀申請權益 <strong>半年</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">⚠️</span>參觀注意事項</div>
+      <div class="rule-section">
+        <ol class="rule-list">
+          <li>如參觀日遇政府發布颱風警報、補假日或調整放假日均暫停辦理。</li>
+          <li>請勿破壞展品或展場設備；展場內請勿喧嘩、奔跑或躺臥座椅。</li>
+          <li>參觀請著整齊服裝、勿穿著不雅。（<strong>勿穿著拖鞋入館</strong>。）</li>
+          <li>請愛護館內的展示品，勿觸摸未開放觸摸之展示品。</li>
+          <li>請勿破壞、移動展示品；如有損壞，應負賠償責任；如攜走展示品，為偷竊行為，將移送法辦。</li>
+          <li>禁止攜帶危險物品、食物、飲料、長傘、寵物（導盲犬除外）；禁止飲食、吸菸、飲酒、嚼食口香糖與檳榔；並禁止隨地吐痰。</li>
+          <li>館內<strong>禁止拍照、錄影、錄音</strong>，亦禁止使用自拍棒、閃光燈、腳架。</li>
+          <li>其他經本所認定有礙館內安全與參觀秩序行為者，將禁止參觀。</li>
+          <li>以上規範，若有任何變動或更正，將以本所現場公告為主；入內訪客視為同意遵守以上規範事項。</li>
+        </ol>
+      </div>
+      <div class="highlight-box">
+        🚌 <strong>停車說明：</strong>不提供預約參觀訪客免費停車位。如為團體以遊覽車者，請於參觀日期前 3 天以電話告知遊覽車車號予本所承辦人 <strong>尚小姐</strong>。
+      </div>
+      <div style="margin-top:12px;font-size:14px;color:var(--text-muted);">
+        📞 參觀相關問題請洽：<strong style="color:var(--primary);">02-22670321 分機 6003</strong>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="showPage('reserve')">我已了解，前往預約 →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ RESERVE ═══════════════════════════════════════ -->
+  <div id="page-reserve" class="page">
+    <div class="card">
+      <div class="card-title"><span class="icon">📝</span>線上參訪預約申請</div>
+
+      <!-- Step indicator -->
+      <div class="steps" id="stepIndicator">
+        <div class="step active" id="step-dot-1">
+          <div class="step-circle">1</div>
+          <div class="step-label">閱讀規定</div>
+        </div>
+        <div class="step-line" id="step-line-1"></div>
+        <div class="step" id="step-dot-2">
+          <div class="step-circle">2</div>
+          <div class="step-label">個資同意</div>
+        </div>
+        <div class="step-line" id="step-line-2"></div>
+        <div class="step" id="step-dot-3">
+          <div class="step-circle">3</div>
+          <div class="step-label">填寫資料</div>
+        </div>
+        <div class="step-line" id="step-line-3"></div>
+        <div class="step" id="step-dot-4">
+          <div class="step-circle">4</div>
+          <div class="step-label">完成預約</div>
+        </div>
+      </div>
+
+      <!-- Step 1: Rules ack -->
+      <div class="form-step active" id="form-step-1">
+        <div class="alert alert-info">ℹ️ 請閱讀以下預約規定，確認後勾選同意，方可進行下一步。</div>
+        <div class="privacy-box" style="max-height:320px;overflow-y:auto;">
+          <p><strong>一、開放時間：</strong>週一至週五，上午 09:30–12:00，下午 13:30–16:30（每次 2 小時上限）。</p>
+          <p><strong>二、參觀人數：</strong>以團體參觀為主，請依實際人數填寫。</p>
+          <p><strong>三、預約時程：</strong>請於預定參觀日期 2 週前預約，且限申請日起 2 個月內之日期。</p>
+          <p><strong>四、取消規定：</strong>如需取消，請於 2 日前來電告知，否則將暫停申請權益半年。</p>
+          <p><strong>五、著裝規定：</strong>請著整齊服裝，勿穿著拖鞋入館。</p>
+          <p><strong>六、禁止事項：</strong>館內禁止拍照、錄影、錄音、飲食、吸菸，禁止攜帶食物、飲料及寵物（導盲犬除外）。</p>
+          <p><strong>七、安全規定：</strong>請勿破壞或移動展示品；如有損壞，應負賠償責任。</p>
+          <p><strong>八、颱風停辦：</strong>如遇颱風警報、補假日或調整放假日均暫停辦理。</p>
+        </div>
+        <div class="checkbox-group" style="margin-top:16px;">
+          <input type="checkbox" id="ack-rules">
+          <label for="ack-rules">本人已詳細閱讀並充分理解以上預約規定，同意遵守所有事項。</label>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="nextStep(1)">下一步：個資同意 →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Privacy -->
+      <div class="form-step" id="form-step-2">
+        <div class="privacy-box" style="max-height:300px;overflow-y:auto;">
+          <p><strong>個人資料保護聲明</strong></p>
+          <p>一、本人同意授權本所將您的個資交付內部其他單位，此個資包含：<strong>姓名、聯絡電話及 E-Mail</strong>。</p>
+          <p>二、除本所之外，相關個資將不會交付給任何其他機構或第三人。</p>
+          <p>三、您的個資僅作為本所紡織印象館預約服務使用，期限為 <strong>3 個月</strong>，期限過後則刪除不保留。</p>
+          <p>四、若對於本所留存之您的個資有查詢、修改、製作副本或刪除的需求，請來電 <strong>02-22670321 分機 6003</strong>。</p>
+          <p>五、若不同意上述注意事項，且不填寫必要的資料者，恕無法提供本項服務。</p>
+        </div>
+        <div class="checkbox-group" style="margin-top:16px;">
+          <input type="checkbox" id="ack-privacy">
+          <label for="ack-privacy">本人已詳細並確認充分理解本段注意事項之文字內容，並同意本所依上述說明蒐集、處理及利用本人之個人資料。</label>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="prevStep(2)">← 上一步</button>
+          <button class="btn btn-primary" onclick="nextStep(2)">下一步：填寫資料 →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Form -->
+      <div class="form-step" id="form-step-3">
+        <form id="reserveForm" novalidate>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>申請單位（機關/學校/公司）<span class="req">*</span></label>
+              <input type="text" id="f-org" placeholder="請輸入申請單位名稱">
+              <div class="field-error" id="err-org"></div>
+            </div>
+            <div class="form-group">
+              <label>聯絡人姓名<span class="req">*</span></label>
+              <input type="text" id="f-name" placeholder="請輸入聯絡人姓名">
+              <div class="field-error" id="err-name"></div>
+            </div>
+            <div class="form-group">
+              <label>聯絡電話<span class="req">*</span></label>
+              <input type="tel" id="f-tel" placeholder="例：02-12345678 或 0912-345-678">
+              <div class="field-error" id="err-tel"></div>
+            </div>
+            <div class="form-group">
+              <label>電子郵件<span class="req">*</span></label>
+              <input type="email" id="f-email" placeholder="example@domain.com">
+              <div class="field-error" id="err-email"></div>
+            </div>
+            <div class="form-group">
+              <label>預定參觀日期<span class="req">*</span></label>
+              <input type="date" id="f-date">
+              <div class="hint" id="date-hint">僅開放工作日，預約日期須為今日起 14 天後至 60 天內</div>
+              <div class="field-error" id="err-date"></div>
+            </div>
+            <div class="form-group">
+              <label>預估參觀人數<span class="req">*</span></label>
+              <input type="number" id="f-count" min="1" placeholder="請輸入人數">
+              <div class="field-error" id="err-count"></div>
+            </div>
+            <div class="form-group full">
+              <label>參觀時段<span class="req">*</span></label>
+              <div class="time-slots" id="timeSlots">
+                <button type="button" class="slot-btn" id="slot-am" onclick="selectSlot('morning')">
+                  上午時段
+                  <span class="slot-time">09:30 – 12:00</span>
+                </button>
+                <button type="button" class="slot-btn" id="slot-pm" onclick="selectSlot('afternoon')">
+                  下午時段
+                  <span class="slot-time">13:30 – 16:30</span>
+                </button>
+              </div>
+              <div class="field-error" id="err-slot"></div>
+            </div>
+            <div class="form-group full">
+              <label>參觀目的<span class="req">*</span></label>
+              <select id="f-purpose">
+                <option value="">請選擇參觀目的</option>
+                <option value="教育學習">教育學習（學校校外教學）</option>
+                <option value="業界參訪">業界參訪（廠商交流）</option>
+                <option value="政府機關">政府機關參訪</option>
+                <option value="學術研究">學術研究</option>
+                <option value="其他">其他</option>
+              </select>
+              <div class="field-error" id="err-purpose"></div>
+            </div>
+            <div class="form-group full">
+              <label>備註事項</label>
+              <textarea id="f-notes" placeholder="如有其他需求或說明，請在此填寫"></textarea>
+            </div>
+          </div>
+        </form>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="prevStep(3)">← 上一步</button>
+          <button class="btn btn-accent" onclick="submitReservation()">送出預約申請</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Confirmation -->
+      <div class="form-step" id="form-step-4">
+        <div class="confirm-box" id="confirmBox"></div>
+        <div class="confirm-details" id="confirmDetails"></div>
+        <div class="alert alert-warning" style="margin-top:16px;">
+          ⚠️ 請妥善保存您的預約編號。如於預定參觀日前 1 週還未收到 E-Mail 通知，請來電洽詢：<strong>02-22670321 分機 6003</strong>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="window.print()">列印確認單</button>
+          <button class="btn btn-primary" onclick="resetReservation()">新增預約</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ QUERY ═══════════════════════════════════════ -->
+  <div id="page-query" class="page">
+    <div class="card">
+      <div class="card-title"><span class="icon">🔍</span>查詢預約</div>
+      <div class="query-form">
+        <div class="form-group" style="flex:1;">
+          <label>預約編號</label>
+          <input type="text" id="q-ref" placeholder="請輸入預約編號，例：TTRI-20260309-001" style="letter-spacing:1px;">
+        </div>
+        <button class="btn btn-primary" onclick="queryByRef()" style="padding:11px 24px;margin-bottom:0;">查詢</button>
+      </div>
+      <div id="query-result" style="margin-top:20px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="icon">📋</span>近期預約記錄</div>
+      <div id="recent-reservations"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ ADMIN ═══════════════════════════════════════ -->
+  <div id="page-admin" class="page">
+    <div id="admin-login-area">
+      <div class="admin-login">
+        <div style="font-size:40px;margin-bottom:12px;">🔐</div>
+        <h2>管理後台登入</h2>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>管理員帳號（Email）</label>
+          <input type="email" id="admin-email" placeholder="請輸入帳號" onkeydown="if(event.key==='Enter')adminLogin()">
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>密碼</label>
+          <input type="password" id="admin-pw" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter')adminLogin()">
+        </div>
+        <button class="btn btn-primary" onclick="adminLogin()" style="width:100%;">登入</button>
+        <div id="admin-login-err" class="field-error" style="margin-top:10px;text-align:center;"></div>
+      </div>
+    </div>
+    <div id="admin-panel" style="display:none;">
+      <!-- Admin tab bar -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" id="tab-reservations" onclick="switchAdminTab('reservations')" style="font-size:13px;padding:8px 18px;">📊 預約管理</button>
+          <button class="btn btn-secondary" id="tab-accounts" onclick="switchAdminTab('accounts')" style="font-size:13px;padding:8px 18px;">👤 帳號管理</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span id="admin-current-user" style="font-size:13px;color:var(--text-muted);"></span>
+          <button class="btn btn-secondary" onclick="adminLogout()" style="font-size:13px;">登出</button>
+        </div>
+      </div>
+
+      <!-- Tab: Reservations -->
+      <div id="admin-tab-reservations">
+        <div class="admin-stats" id="adminStats"></div>
+        <div class="card">
+          <div class="card-title"><span class="icon">📊</span>預約清單</div>
+          <div class="admin-toolbar">
+            <div class="admin-filter">
+              <select id="admin-filter-status" onchange="renderAdminTable()">
+                <option value="">全部狀態</option>
+                <option value="pending">待確認</option>
+                <option value="confirmed">已確認</option>
+                <option value="cancelled">已取消</option>
+              </select>
+            </div>
+            <input type="text" id="admin-search" placeholder="搜尋單位/聯絡人..." oninput="renderAdminTable()" style="flex:1;max-width:240px;">
+            <button class="btn btn-secondary" onclick="exportCSV()">匯出 CSV</button>
+            <button class="btn btn-danger" onclick="clearAll()" style="margin-left:auto;">清除所有資料</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="admin-table" id="adminTable">
+              <thead>
+                <tr>
+                  <th>預約編號</th><th>申請單位</th><th>聯絡人</th><th>電話</th>
+                  <th>參觀日期</th><th>時段</th><th>人數</th><th>狀態</th><th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="adminTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Account Management -->
+      <div id="admin-tab-accounts" style="display:none;">
+        <div class="card">
+          <div class="card-title"><span class="icon">👤</span>管理員帳號</div>
+          <div class="admin-toolbar">
+            <button class="btn btn-primary" onclick="showAddAccountForm()" style="font-size:13px;">+ 新增管理員</button>
+          </div>
+          <div id="account-list"></div>
+        </div>
+
+        <!-- Add account form -->
+        <div class="card" id="add-account-form" style="display:none;">
+          <div class="card-title"><span class="icon">➕</span>新增管理員帳號</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>姓名</label>
+              <input type="text" id="new-admin-name" placeholder="請輸入姓名">
+            </div>
+            <div class="form-group">
+              <label>帳號（Email）</label>
+              <input type="email" id="new-admin-email" placeholder="example@ttri.org.tw">
+            </div>
+            <div class="form-group">
+              <label>密碼</label>
+              <input type="password" id="new-admin-pass" placeholder="請設定密碼（至少8碼）">
+            </div>
+            <div class="form-group">
+              <label>確認密碼</label>
+              <input type="password" id="new-admin-pass2" placeholder="再次輸入密碼">
+            </div>
+          </div>
+          <div class="field-error" id="add-account-err" style="margin-top:8px;"></div>
+          <div class="btn-row">
+            <button class="btn btn-secondary" onclick="hideAddAccountForm()">取消</button>
+            <button class="btn btn-primary" onclick="addAdminAccount()">新增帳號</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <strong>財團法人紡織產業綜合研究所 · 紡織印象館</strong><br>
+  聯絡電話：02-22670321 分機 6003　傳真：02-2268-9834　E-Mail：<a href="mailto:mhsheng.0805@ttri.org.tw" style="color:rgba(255,255,255,0.8);">mhsheng.0805@ttri.org.tw</a><br>
+  承辦人：尚小姐
+  <br><span id="adminAccessTrigger" style="opacity:0;user-select:none;cursor:default;font-size:10px;" title="">&copy;</span>
+</footer>
+
+<script>
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const LS_KEY = 'ttri_reservations';
+
+function getReservations() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch { return []; }
+}
+function saveReservations(arr) {
+  localStorage.setItem(LS_KEY, JSON.stringify(arr));
+}
+function genRef(date) {
+  const d = date.replace(/-/g, '');
+  const all = getReservations();
+  const same = all.filter(r => r.date === date).length;
+  const seq = String(same + 1).padStart(3, '0');
+  return `TTRI-${d}-${seq}`;
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+const pages = ['home','rules','reserve','query','admin'];
+function showPage(id) {
+  pages.forEach(p => {
+    document.getElementById('page-' + p).classList.remove('active');
+  });
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((b, i) => {
+    b.classList.toggle('active', pages[i] === id);
+  });
+  if (id === 'query') renderRecentReservations();
+  if (id === 'admin' && document.getElementById('admin-panel').style.display !== 'none') {
+    renderAdminStats(); renderAdminTable();
+  }
+  window.scrollTo(0, 0);
+}
+
+// ── Steps ─────────────────────────────────────────────────────────────────────
+let currentStep = 1;
+function updateStepUI(step) {
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById('step-dot-' + i);
+    const circle = dot.querySelector('.step-circle');
+    dot.classList.remove('active', 'done');
+    if (i < step) { dot.classList.add('done'); circle.textContent = '✓'; }
+    else if (i === step) { dot.classList.add('active'); circle.textContent = i; }
+    else { circle.textContent = i; }
+    if (i < 4) {
+      document.getElementById('step-line-' + i).classList.toggle('done', i < step);
+    }
+  }
+}
+function nextStep(from) {
+  if (from === 1) {
+    if (!document.getElementById('ack-rules').checked) {
+      alert('請先勾選同意預約規定。'); return;
+    }
+  }
+  if (from === 2) {
+    if (!document.getElementById('ack-privacy').checked) {
+      alert('請先勾選同意個資聲明。'); return;
+    }
+    initDatePicker();
+  }
+  document.getElementById('form-step-' + from).classList.remove('active');
+  document.getElementById('form-step-' + (from + 1)).classList.add('active');
+  currentStep = from + 1;
+  updateStepUI(currentStep);
+}
+function prevStep(from) {
+  document.getElementById('form-step-' + from).classList.remove('active');
+  document.getElementById('form-step-' + (from - 1)).classList.add('active');
+  currentStep = from - 1;
+  updateStepUI(currentStep);
+}
+
+// ── Date Picker ───────────────────────────────────────────────────────────────
+function initDatePicker() {
+  const input = document.getElementById('f-date');
+  const today = new Date();
+  const minDate = new Date(today); minDate.setDate(today.getDate() + 14);
+  const maxDate = new Date(today); maxDate.setDate(today.getDate() + 60);
+  input.min = toISO(minDate);
+  input.max = toISO(maxDate);
+  input.addEventListener('change', onDateChange);
+}
+function toISO(d) {
+  return d.toISOString().split('T')[0];
+}
+function onDateChange() {
+  const d = new Date(document.getElementById('f-date').value + 'T00:00:00');
+  const day = d.getDay();
+  document.getElementById('slot-am').classList.remove('full');
+  document.getElementById('slot-pm').classList.remove('full');
+  if (day === 0 || day === 6) {
+    document.getElementById('err-date').textContent = '此日期為假日，請選擇週一至週五的工作日。';
+    document.getElementById('f-date').classList.add('error');
+    return;
+  }
+  document.getElementById('err-date').textContent = '';
+  document.getElementById('f-date').classList.remove('error');
+  // Check slot availability
+  const dateStr = document.getElementById('f-date').value;
+  const reservations = getReservations().filter(r => r.date === dateStr && r.status !== 'cancelled');
+  const amTaken = reservations.some(r => r.slot === 'morning');
+  const pmTaken = reservations.some(r => r.slot === 'afternoon');
+  if (amTaken) {
+    document.getElementById('slot-am').classList.add('full');
+    document.getElementById('slot-am').title = '此時段已額滿';
+    if (selectedSlot === 'morning') { selectedSlot = ''; document.getElementById('slot-am').classList.remove('selected'); }
+  }
+  if (pmTaken) {
+    document.getElementById('slot-pm').classList.add('full');
+    document.getElementById('slot-pm').title = '此時段已額滿';
+    if (selectedSlot === 'afternoon') { selectedSlot = ''; document.getElementById('slot-pm').classList.remove('selected'); }
+  }
+}
+
+// ── Slot selection ────────────────────────────────────────────────────────────
+let selectedSlot = '';
+function selectSlot(slot) {
+  const btn = document.getElementById(slot === 'morning' ? 'slot-am' : 'slot-pm');
+  if (btn.classList.contains('full')) return;
+  selectedSlot = slot;
+  document.getElementById('slot-am').classList.toggle('selected', slot === 'morning');
+  document.getElementById('slot-pm').classList.toggle('selected', slot === 'afternoon');
+  document.getElementById('err-slot').textContent = '';
+}
+
+// ── Validation ────────────────────────────────────────────────────────────────
+function validateField(id, errId, rule, msg) {
+  const val = document.getElementById(id).value.trim();
+  if (!rule(val)) {
+    document.getElementById(errId).textContent = msg;
+    document.getElementById(id).classList.add('error');
+    return false;
+  }
+  document.getElementById(errId).textContent = '';
+  document.getElementById(id).classList.remove('error');
+  return true;
+}
+function validateForm() {
+  let ok = true;
+  ok &= validateField('f-org', 'err-org', v => v.length >= 2, '請輸入申請單位名稱（至少 2 字）');
+  ok &= validateField('f-name', 'err-name', v => v.length >= 2, '請輸入聯絡人姓名');
+  ok &= validateField('f-tel', 'err-tel', v => /^[\d\-\(\)\s+]+$/.test(v) && v.replace(/\D/g,'').length >= 8, '請輸入有效的聯絡電話');
+  ok &= validateField('f-email', 'err-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), '請輸入有效的電子郵件地址');
+  ok &= validateField('f-count', 'err-count', v => { const n = parseInt(v); return n >= 1; }, '請輸入有效的參觀人數');
+  ok &= validateField('f-purpose', 'err-purpose', v => v !== '', '請選擇參觀目的');
+  // Date
+  const dateVal = document.getElementById('f-date').value;
+  if (!dateVal) {
+    document.getElementById('err-date').textContent = '請選擇預定參觀日期';
+    document.getElementById('f-date').classList.add('error');
+    ok = false;
+  } else {
+    const d = new Date(dateVal + 'T00:00:00');
+    if (d.getDay() === 0 || d.getDay() === 6) {
+      document.getElementById('err-date').textContent = '此日期為假日，請選擇工作日';
+      document.getElementById('f-date').classList.add('error');
+      ok = false;
+    } else {
+      document.getElementById('err-date').textContent = '';
+      document.getElementById('f-date').classList.remove('error');
+    }
+  }
+  // Slot
+  if (!selectedSlot) {
+    document.getElementById('err-slot').textContent = '請選擇參觀時段';
+    ok = false;
+  }
+  return !!ok;
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+function submitReservation() {
+  if (!validateForm()) return;
+  const dateVal = document.getElementById('f-date').value;
+
+  // ── 提交前再次確認時段未被搶佔 ──────────────────────────────────────────
+  const existing = getReservations().filter(r => r.date === dateVal && r.status !== 'cancelled');
+  const slotTaken = existing.some(r => r.slot === selectedSlot);
+  if (slotTaken) {
+    const slotLabel = selectedSlot === 'morning' ? '上午（09:30–12:00）' : '下午（13:30–16:30）';
+    alert(`抱歉，${dateVal} ${slotLabel} 時段已有其他單位完成預約，\n請重新選擇日期或時段。`);
+    // 重新更新按鈕狀態
+    onDateChange();
+    selectedSlot = '';
+    document.getElementById('slot-am').classList.remove('selected');
+    document.getElementById('slot-pm').classList.remove('selected');
+    document.getElementById('err-slot').textContent = '此時段已被預約，請重新選擇';
+    return;
+  }
+  const refNo = genRef(dateVal);
+  const rec = {
+    ref: refNo,
+    org: document.getElementById('f-org').value.trim(),
+    name: document.getElementById('f-name').value.trim(),
+    tel: document.getElementById('f-tel').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    date: dateVal,
+    slot: selectedSlot,
+    slotLabel: selectedSlot === 'morning' ? '上午 09:30–12:00' : '下午 13:30–16:30',
+    count: document.getElementById('f-count').value,
+    purpose: document.getElementById('f-purpose').value,
+    guide: '',
+    notes: document.getElementById('f-notes').value.trim(),
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+  const arr = getReservations();
+  arr.push(rec);
+  saveReservations(arr);
+  showConfirmation(rec);
+  document.getElementById('form-step-3').classList.remove('active');
+  document.getElementById('form-step-4').classList.add('active');
+  currentStep = 4;
+  updateStepUI(4);
+}
+
+function showConfirmation(rec) {
+  const dateDisplay = rec.date.replace(/-/g, '/');
+  document.getElementById('confirmBox').innerHTML = `
+    <div class="icon">✅</div>
+    <h2>預約申請已送出！</h2>
+    <p class="ref">您的預約編號</p>
+    <div class="ref-no">${rec.ref}</div>
+    <p class="ref" style="color:var(--text-muted);">請保存此編號以便查詢或取消預約</p>
+  `;
+  document.getElementById('confirmDetails').innerHTML = `
+    <table>
+      <tr><td>預約編號</td><td><strong>${rec.ref}</strong></td></tr>
+      <tr><td>申請單位</td><td>${rec.org}</td></tr>
+      <tr><td>聯絡人</td><td>${rec.name}</td></tr>
+      <tr><td>聯絡電話</td><td>${rec.tel}</td></tr>
+      <tr><td>電子郵件</td><td>${rec.email}</td></tr>
+      <tr><td>參觀日期</td><td>${dateDisplay}</td></tr>
+      <tr><td>參觀時段</td><td>${rec.slotLabel}</td></tr>
+      <tr><td>參觀人數</td><td>${rec.count} 人</td></tr>
+      <tr><td>參觀目的</td><td>${rec.purpose}</td></tr>
+      ${rec.notes ? `<tr><td>備註</td><td>${rec.notes}</td></tr>` : ''}
+      <tr><td>申請狀態</td><td><span class="status-badge status-pending">待確認</span></td></tr>
+    </table>
+  `;
+}
+
+function resetReservation() {
+  currentStep = 1;
+  updateStepUI(1);
+  document.querySelectorAll('.form-step').forEach((el, i) => {
+    el.classList.toggle('active', i === 0);
+  });
+  document.getElementById('reserveForm').reset();
+  selectedSlot = '';
+  document.getElementById('slot-am').classList.remove('selected', 'full');
+  document.getElementById('slot-pm').classList.remove('selected', 'full');
+  document.getElementById('ack-rules').checked = false;
+  document.getElementById('ack-privacy').checked = false;
+  document.querySelectorAll('.field-error').forEach(e => e.textContent = '');
+  document.querySelectorAll('input.error, select.error, textarea.error').forEach(e => e.classList.remove('error'));
+}
+
+// ── Query ─────────────────────────────────────────────────────────────────────
+function queryByRef() {
+  const ref = document.getElementById('q-ref').value.trim().toUpperCase();
+  const all = getReservations();
+  const rec = all.find(r => r.ref.toUpperCase() === ref);
+  const el = document.getElementById('query-result');
+  if (!rec) {
+    el.innerHTML = '<div class="alert alert-error">❌ 查無此預約編號，請確認輸入是否正確。</div>';
+    return;
+  }
+  el.innerHTML = renderReservationCard(rec, true);
+}
+
+function renderRecentReservations() {
+  const all = getReservations().slice().reverse().slice(0, 10);
+  const el = document.getElementById('recent-reservations');
+  if (!all.length) {
+    el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">目前尚無預約記錄。</p>';
+    return;
+  }
+  el.innerHTML = all.map(r => renderReservationCard(r, true)).join('');
+}
+
+function renderReservationCard(rec, showCancel) {
+  const dateDisplay = rec.date.replace(/-/g, '/');
+  const statusBadge = {
+    pending: '<span class="status-badge status-pending">待確認</span>',
+    confirmed: '<span class="status-badge status-confirmed">已確認</span>',
+    cancelled: '<span class="status-badge status-cancelled">已取消</span>'
+  }[rec.status] || '';
+  const cancelBtn = (showCancel && rec.status !== 'cancelled')
+    ? `<button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;" onclick="cancelReservation('${rec.ref}')">取消預約</button>`
+    : '';
+  return `
+    <div class="reservation-item ${rec.status === 'cancelled' ? 'cancelled' : ''}">
+      <div class="ri-info">
+        <div class="ref">預約編號：${rec.ref}</div>
+        <div class="name">${rec.org} · ${rec.name}</div>
+        <div class="detail">📅 ${dateDisplay} &nbsp;⏰ ${rec.slotLabel} &nbsp;👥 ${rec.count} 人</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+        ${statusBadge}
+        ${cancelBtn}
+      </div>
+    </div>`;
+}
+
+function cancelReservation(ref) {
+  if (!confirm(`確定要取消預約 ${ref} 嗎？\n取消後請來電告知：02-22670321 分機 6003`)) return;
+  const all = getReservations();
+  const idx = all.findIndex(r => r.ref === ref);
+  if (idx === -1) return;
+  all[idx].status = 'cancelled';
+  saveReservations(all);
+  renderRecentReservations();
+  const qRes = document.getElementById('query-result');
+  if (qRes.innerHTML.includes(ref)) {
+    const el = document.getElementById('q-ref');
+    el.value = ref;
+    queryByRef();
+  }
+  alert('預約已取消。如有疑問請來電：02-22670321 分機 6003');
+}
+
+// ── Admin Auth ────────────────────────────────────────────────────────────────
+const ADMIN_KEY = 'ttri_admins';
+let adminLoggedIn = false;
+let currentAdminEmail = '';
+
+// Simple hash (FNV-1a 64bit simulation via string operations for browser compatibility)
+function simpleHash(str) {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i);
+    hash = (hash * 0x01000193) >>> 0;
+  }
+  // Mix with length for extra uniqueness
+  hash ^= str.length * 0x9e3779b9;
+  return (hash >>> 0).toString(16).padStart(8,'0') + str.split('').reverse()
+    .reduce((a,c)=>((a<<5)-a+c.charCodeAt(0))|0, 5381).toString(16).padStart(8,'0');
+}
+
+function getAdmins() {
+  try { return JSON.parse(localStorage.getItem(ADMIN_KEY) || '[]'); } catch { return []; }
+}
+function saveAdmins(arr) { localStorage.setItem(ADMIN_KEY, JSON.stringify(arr)); }
+
+function initAdminAccounts() {
+  if (!getAdmins().length) {
+    saveAdmins([{
+      email: 'service@ttri.org.tw',
+      hash: simpleHash('Ttri01891206@'),
+      name: '系統管理員',
+      createdAt: new Date().toISOString()
+    }]);
+  }
+}
+
+function adminLogin() {
+  const email = document.getElementById('admin-email').value.trim().toLowerCase();
+  const pw    = document.getElementById('admin-pw').value;
+  const admins = getAdmins();
+  const found  = admins.find(a => a.email.toLowerCase() === email && a.hash === simpleHash(pw));
+  if (found) {
+    adminLoggedIn = true;
+    currentAdminEmail = found.email;
+    document.getElementById('admin-login-area').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    document.getElementById('admin-current-user').textContent = `登入者：${found.name}（${found.email}）`;
+    switchAdminTab('reservations');
+    renderAdminStats();
+    renderAdminTable();
+  } else {
+    document.getElementById('admin-login-err').textContent = '帳號或密碼錯誤，請重試。';
+  }
+}
+function adminLogout() {
+  adminLoggedIn = false;
+  currentAdminEmail = '';
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-login-area').style.display = 'block';
+  document.getElementById('admin-email').value = '';
+  document.getElementById('admin-pw').value = '';
+  document.getElementById('admin-login-err').textContent = '';
+}
+
+// ── Admin Tabs ─────────────────────────────────────────────────────────────────
+function switchAdminTab(tab) {
+  document.getElementById('admin-tab-reservations').style.display = tab === 'reservations' ? 'block' : 'none';
+  document.getElementById('admin-tab-accounts').style.display     = tab === 'accounts'     ? 'block' : 'none';
+  document.getElementById('tab-reservations').className = 'btn ' + (tab === 'reservations' ? 'btn-primary' : 'btn-secondary');
+  document.getElementById('tab-accounts').className     = 'btn ' + (tab === 'accounts'     ? 'btn-primary' : 'btn-secondary');
+  if (tab === 'accounts') renderAccountList();
+}
+
+// ── Account Management ─────────────────────────────────────────────────────────
+function renderAccountList() {
+  const admins = getAdmins();
+  const el = document.getElementById('account-list');
+  if (!admins.length) { el.innerHTML = '<p style="color:var(--text-muted);padding:16px;">尚無管理員帳號。</p>'; return; }
+  el.innerHTML = `<table class="admin-table" style="margin-top:8px;">
+    <thead><tr><th>姓名</th><th>帳號（Email）</th><th>建立時間</th><th>操作</th></tr></thead>
+    <tbody>${admins.map(a => `
+      <tr>
+        <td>${a.name}</td>
+        <td>${a.email}</td>
+        <td>${new Date(a.createdAt).toLocaleString('zh-TW')}</td>
+        <td>${a.email === currentAdminEmail
+          ? '<span style="font-size:12px;color:var(--text-muted);">（目前登入）</span>'
+          : `<button class="btn btn-danger" style="font-size:11px;padding:5px 10px;" onclick="deleteAdmin('${a.email}')">刪除</button>`
+        }</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+function showAddAccountForm()  { document.getElementById('add-account-form').style.display = 'block'; }
+function hideAddAccountForm()  {
+  document.getElementById('add-account-form').style.display = 'none';
+  ['new-admin-name','new-admin-email','new-admin-pass','new-admin-pass2'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('add-account-err').textContent = '';
+}
+function addAdminAccount() {
+  const name  = document.getElementById('new-admin-name').value.trim();
+  const email = document.getElementById('new-admin-email').value.trim().toLowerCase();
+  const pass  = document.getElementById('new-admin-pass').value;
+  const pass2 = document.getElementById('new-admin-pass2').value;
+  const err   = document.getElementById('add-account-err');
+  if (!name)              { err.textContent = '請輸入姓名。'; return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = '請輸入有效的 Email。'; return; }
+  if (pass.length < 8)    { err.textContent = '密碼至少需要 8 個字元。'; return; }
+  if (pass !== pass2)     { err.textContent = '兩次密碼不一致。'; return; }
+  const admins = getAdmins();
+  if (admins.find(a => a.email.toLowerCase() === email)) { err.textContent = '此帳號已存在。'; return; }
+  admins.push({ email, hash: simpleHash(pass), name, createdAt: new Date().toISOString() });
+  saveAdmins(admins);
+  hideAddAccountForm();
+  renderAccountList();
+  alert(`管理員帳號「${name}（${email}）」已新增。`);
+}
+function deleteAdmin(email) {
+  if (!confirm(`確定要刪除帳號 ${email} 嗎？`)) return;
+  saveAdmins(getAdmins().filter(a => a.email !== email));
+  renderAccountList();
+}
+
+// ── Hidden admin access (click © in footer 5 times) ──────────────────────────
+let footerClickCount = 0;
+document.addEventListener('DOMContentLoaded', () => {
+  const trigger = document.getElementById('adminAccessTrigger');
+  if (trigger) {
+    trigger.addEventListener('click', () => {
+      footerClickCount++;
+      if (footerClickCount >= 5) {
+        footerClickCount = 0;
+        showPage('admin');
+      }
+    });
+  }
+  initAdminAccounts();
+});
+
+function renderAdminStats() {
+  const all = getReservations();
+  const stats = {
+    total: all.length,
+    pending: all.filter(r => r.status === 'pending').length,
+    confirmed: all.filter(r => r.status === 'confirmed').length,
+    cancelled: all.filter(r => r.status === 'cancelled').length
+  };
+  document.getElementById('adminStats').innerHTML = `
+    <div class="stat-card"><div class="num">${stats.total}</div><div class="lbl">全部預約</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--warning)">${stats.pending}</div><div class="lbl">待確認</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--success)">${stats.confirmed}</div><div class="lbl">已確認</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--error)">${stats.cancelled}</div><div class="lbl">已取消</div></div>
+  `;
+}
+
+function renderAdminTable() {
+  const filterStatus = document.getElementById('admin-filter-status').value;
+  const search = document.getElementById('admin-search').value.toLowerCase();
+  let all = getReservations().slice().reverse();
+  if (filterStatus) all = all.filter(r => r.status === filterStatus);
+  if (search) all = all.filter(r =>
+    r.org.toLowerCase().includes(search) ||
+    r.name.toLowerCase().includes(search) ||
+    r.ref.toLowerCase().includes(search)
+  );
+  const tbody = document.getElementById('adminTableBody');
+  if (!all.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:24px;">無資料</td></tr>';
+    return;
+  }
+  tbody.innerHTML = all.map(r => {
+    const statusOpts = ['pending','confirmed','cancelled'].map(s =>
+      `<option value="${s}" ${r.status === s ? 'selected' : ''}>${{pending:'待確認',confirmed:'已確認',cancelled:'已取消'}[s]}</option>`
+    ).join('');
+    return `<tr>
+      <td style="font-size:11px;letter-spacing:0.5px">${r.ref}</td>
+      <td>${r.org}</td>
+      <td>${r.name}</td>
+      <td>${r.tel}</td>
+      <td>${r.date}</td>
+      <td>${r.slot === 'morning' ? '上午' : '下午'}</td>
+      <td>${r.count}</td>
+      <td>
+        <select style="font-size:12px;padding:4px 8px;" onchange="updateStatus('${r.ref}',this.value)">
+          ${statusOpts}
+        </select>
+      </td>
+      <td>
+        <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px;" onclick="viewDetail('${r.ref}')">詳細</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function updateStatus(ref, status) {
+  const all = getReservations();
+  const idx = all.findIndex(r => r.ref === ref);
+  if (idx !== -1) {
+    all[idx].status = status;
+    saveReservations(all);
+    renderAdminStats();
+  }
+}
+
+function viewDetail(ref) {
+  const rec = getReservations().find(r => r.ref === ref);
+  if (!rec) return;
+  const dateDisplay = rec.date.replace(/-/g, '/');
+  alert(`【預約詳細資料】\n\n預約編號：${rec.ref}\n申請單位：${rec.org}\n聯絡人：${rec.name}\n電話：${rec.tel}\nEmail：${rec.email}\n參觀日期：${dateDisplay}\n時段：${rec.slotLabel}\n人數：${rec.count} 人\n參觀目的：${rec.purpose}\n備註：${rec.notes || '（無）'}\n狀態：${rec.status}\n申請時間：${new Date(rec.createdAt).toLocaleString('zh-TW')}`);
+}
+
+function exportCSV() {
+  const all = getReservations();
+  if (!all.length) { alert('目前無資料可匯出。'); return; }
+  const headers = ['預約編號','申請單位','聯絡人','電話','Email','參觀日期','時段','人數','目的','備註','狀態','申請時間'];
+  const rows = all.map(r => [
+    r.ref, r.org, r.name, r.tel, r.email, r.date,
+    r.slot === 'morning' ? '上午' : '下午',
+    r.count, r.purpose, r.notes,
+    r.status, new Date(r.createdAt).toLocaleString('zh-TW')
+  ].map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(','));
+  const csv = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `紡織印象館預約清單_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+}
+
+function clearAll() {
+  if (!confirm('確定要清除所有預約資料嗎？此操作無法復原。')) return;
+  if (!confirm('再次確認：清除所有資料？')) return;
+  localStorage.removeItem(LS_KEY);
+  renderAdminStats();
+  renderAdminTable();
+  alert('所有資料已清除。');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+updateStepUI(1);
+</script>
+</body>
+</html>
