@@ -759,7 +759,7 @@
             <table class="admin-table" id="adminTable">
               <thead>
                 <tr>
-                  <th>預約編號</th><th>申請單位</th><th>聯絡人</th><th>電話</th>
+                  <th>預約編號</th><th>申請單位</th><th>聯絡人</th><th>電話</th><th>Email</th>
                   <th>參觀日期</th><th>時段</th><th>人數</th><th>狀態</th><th>審核 / 通知</th>
                 </tr>
               </thead>
@@ -988,8 +988,14 @@ function validateForm() {
     ok = false;
   } else {
     const d = new Date(dateVal + 'T00:00:00');
+    const today = new Date(); today.setHours(0,0,0,0);
+    const minAllowed = new Date(today); minAllowed.setDate(today.getDate() + 14);
     if (d.getDay() === 0 || d.getDay() === 6) {
       document.getElementById('err-date').textContent = '此日期為假日，請選擇工作日';
+      document.getElementById('f-date').classList.add('error');
+      ok = false;
+    } else if (d < minAllowed) {
+      document.getElementById('err-date').textContent = '預約日期須於申請日 2 週（14天）後，請重新選擇';
       document.getElementById('f-date').classList.add('error');
       ok = false;
     } else {
@@ -1331,7 +1337,7 @@ function renderAdminTable() {
   );
   const tbody = document.getElementById('adminTableBody');
   if (!all.length) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:24px;">無資料</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:24px;">無資料</td></tr>';
     return;
   }
   const statusLabel = { pending:'待確認', confirmed:'已確認', cancelled:'已取消' };
@@ -1341,6 +1347,7 @@ function renderAdminTable() {
       <td>${r.org}</td>
       <td>${r.name}</td>
       <td>${r.tel}</td>
+      <td style="font-size:12px;"><a href="mailto:${r.email}" style="color:var(--primary);">${r.email}</a></td>
       <td>${r.date}</td>
       <td>${r.slot === 'morning' ? '上午' : '下午'}</td>
       <td>${r.count}</td>
