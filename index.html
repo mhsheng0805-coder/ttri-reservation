@@ -760,12 +760,14 @@
             <button class="btn btn-secondary" onclick="loadAdminData()" title="重新從雲端讀取資料">🔄 重新整理</button>
             <button class="btn btn-secondary" onclick="exportExcel()">📊 匯出 Excel</button>
             <button class="btn btn-secondary" onclick="exportCSV()">匯出 CSV</button>
+            <button class="btn btn-danger" id="btn-delete-selected" onclick="deleteSelected()" style="display:none;">🗑️ 刪除選取</button>
             <button class="btn btn-danger" onclick="clearAll()" style="margin-left:auto;">清除所有資料</button>
           </div>
           <div style="overflow-x:auto;">
             <table class="admin-table" id="adminTable">
               <thead>
                 <tr>
+                  <th style="width:36px;"><input type="checkbox" id="chk-all" onclick="toggleAllCheckbox(this)" title="全選"></th>
                   <th>預約編號</th><th>申請單位</th><th>聯絡人</th><th>電話</th><th>Email</th>
                   <th>參觀日期</th><th>時段</th><th>人數</th><th>狀態</th><th>審核 / 通知</th>
                 </tr>
@@ -1443,6 +1445,7 @@ function renderAdminTable() {
   const statusLabel = { pending:'待確認', confirmed:'已確認', cancelled:'已取消' };
   tbody.innerHTML = all.map(r => {
     return `<tr>
+      <td><input type="checkbox" class="row-chk" value="${r.ref}" onchange="updateDeleteBtn()"></td>
       <td style="font-size:11px;letter-spacing:0.5px">${r.ref}</td>
       <td>${r.org}</td>
       <td>${r.name}</td>
@@ -1649,6 +1652,38 @@ function exportCSV() {
   a.href = URL.createObjectURL(blob);
   a.download = `紡織印象館預約清單_${new Date().toISOString().split('T')[0]}.csv`;
   a.click();
+}
+
+function toggleAllCheckbox(chk) {
+  document.querySelectorAll('.row-chk').forEach(c => c.checked = chk.checked);
+  updateDeleteBtn();
+}
+function updateDeleteBtn() {
+  const any = document.querySelectorAll('.row-chk:checked').length > 0;
+  document.getElementById('btn-delete-selected').style.display = any ? 'inline-block' : 'none';
+  const all = document.querySelectorAll('.row-chk');
+  const allChecked = all.length > 0 && document.querySelectorAll('.row-chk:checked').length === all.length;
+  const chkAll = document.getElementById('chk-all');
+  if (chkAll) chkAll.checked = allChecked;
+}
+async function deleteSelected() {
+  const checked = [...document.querySelectorAll('.row-chk:checked')].map(c => c.value);
+  if (!checked.length) return;
+  if (!confirm(`確定要刪除選取的 ${checked.length} 筆預約資料嗎？`)) return;
+  // 刪除 adminCache
+  adminCache = adminCache.filter(r => !checked.includes(r.ref));
+  // 刪除 localStorage
+  const local = getReservations().filter(r => !checked.includes(r.ref));
+  saveReservations(local);
+  // 刪除 Apps Script
+  if (SCRIPT_URL) {
+    try {
+      await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'deleteRefs', refs: checked }) });
+    } catch(e) { console.warn('Apps Script 刪除失敗', e); }
+  }
+  document.getElementById('btn-delete-selected').style.display = 'none';
+  renderAdminStats(); renderAdminTable();
+  alert(`已刪除 ${checked.length} 筆資料。`);
 }
 
 async function clearAll() {
