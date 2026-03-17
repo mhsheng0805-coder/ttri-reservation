@@ -1120,11 +1120,28 @@ function resetReservation() {
 }
 
 // ── Query ─────────────────────────────────────────────────────────────────────
-function queryByRef() {
+async function queryByRef() {
   const ref = document.getElementById('q-ref').value.trim().toUpperCase();
-  const all = getReservations();
-  const rec = all.find(r => r.ref.toUpperCase() === ref);
   const el = document.getElementById('query-result');
+  el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:12px;">查詢中…</p>';
+  let rec = null;
+  if (SCRIPT_URL) {
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=getByRef&ref=' + encodeURIComponent(ref));
+      const data = await res.json();
+      if (data.success) {
+        rec = data.record;
+        // 同步更新 localStorage 狀態
+        const local = getReservations();
+        const li = local.findIndex(r => r.ref.toUpperCase() === ref);
+        if (li !== -1) { local[li].status = rec.status; local[li].cancelReason = rec.cancelReason; saveReservations(local); }
+      }
+    } catch(e) { /* 若失敗改用 localStorage */ }
+  }
+  if (!rec) {
+    const all = getReservations();
+    rec = all.find(r => r.ref.toUpperCase() === ref);
+  }
   if (!rec) {
     el.innerHTML = '<div class="alert alert-error">❌ 查無此預約編號，請確認輸入是否正確。</div>';
     return;
@@ -1132,14 +1149,37 @@ function queryByRef() {
   el.innerHTML = renderReservationCard(rec, true);
 }
 
-function renderRecentReservations() {
-  const all = getReservations().slice().reverse().slice(0, 10);
+async function renderRecentReservations() {
+  const local = getReservations().slice().reverse().slice(0, 10);
   const el = document.getElementById('recent-reservations');
-  if (!all.length) {
+  if (!local.length) {
     el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">目前尚無預約記錄。</p>';
     return;
   }
-  el.innerHTML = all.map(r => renderReservationCard(r, true)).join('');
+  // 先顯示 localStorage 資料，再從 Apps Script 同步最新狀態
+  el.innerHTML = local.map(r => renderReservationCard(r, true)).join('');
+  if (SCRIPT_URL) {
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=list');
+      const data = await res.json();
+      if (data.success) {
+        const remoteMap = {};
+        data.records.forEach(r => remoteMap[r.ref] = r);
+        const updated = getReservations();
+        let changed = false;
+        updated.forEach(r => {
+          if (remoteMap[r.ref] && r.status !== remoteMap[r.ref].status) {
+            r.status = remoteMap[r.ref].status;
+            r.cancelReason = remoteMap[r.ref].cancelReason;
+            changed = true;
+          }
+        });
+        if (changed) saveReservations(updated);
+        const fresh = updated.slice().reverse().slice(0, 10);
+        el.innerHTML = fresh.map(r => renderReservationCard(r, true)).join('');
+      }
+    } catch(e) { /* 保留 localStorage 顯示 */ }
+  }
 }
 
 function renderReservationCard(rec, showCancel) {
