@@ -637,7 +637,7 @@
             </div>
             <div class="form-group">
               <label>預估參觀人數<span class="req">*</span></label>
-              <input type="number" id="f-count" min="1" placeholder="請輸入人數">
+              <input type="number" id="f-count" min="5" placeholder="請輸入人數（至少 5 人）">
               <div class="field-error" id="err-count"></div>
             </div>
             <div class="form-group full">
@@ -994,7 +994,7 @@ function validateForm() {
   ok &= validateField('f-name', 'err-name', v => v.length >= 2, '請輸入聯絡人姓名');
   ok &= validateField('f-tel', 'err-tel', v => /^[\d\-\(\)\s+]+$/.test(v) && v.replace(/\D/g,'').length >= 8, '請輸入有效的聯絡電話');
   ok &= validateField('f-email', 'err-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), '請輸入有效的電子郵件地址');
-  ok &= validateField('f-count', 'err-count', v => { const n = parseInt(v); return n >= 1; }, '請輸入有效的參觀人數');
+  ok &= validateField('f-count', 'err-count', v => { const n = parseInt(v); return n >= 5; }, '參觀人數至少需要 5 人');
   ok &= validateField('f-purpose', 'err-purpose', v => v !== '', '請選擇參觀目的');
   // Date
   const dateVal = document.getElementById('f-date').value;
