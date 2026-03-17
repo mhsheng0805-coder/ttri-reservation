@@ -761,6 +761,7 @@
               </select>
             </div>
             <input type="text" id="admin-search" placeholder="搜尋單位/聯絡人..." oninput="renderAdminTable()" style="flex:1;max-width:240px;">
+            <button class="btn btn-secondary" onclick="loadAdminData()" title="重新從雲端讀取資料">🔄 重新整理</button>
             <button class="btn btn-secondary" onclick="exportExcel()">📊 匯出 Excel</button>
             <button class="btn btn-secondary" onclick="exportCSV()">匯出 CSV</button>
             <button class="btn btn-danger" onclick="clearAll()" style="margin-left:auto;">清除所有資料</button>
@@ -846,6 +847,10 @@
 <script>
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const LS_KEY = 'ttri_reservations';
+// ★ 填入你的 Google Apps Script 網址（部署後取得）
+const SCRIPT_URL = '';
+
+let adminCache = []; // 後台資料快取
 
 function getReservations() {
   try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch { return []; }
@@ -873,7 +878,7 @@ function showPage(id) {
   });
   if (id === 'query') renderRecentReservations();
   if (id === 'admin' && document.getElementById('admin-panel').style.display !== 'none') {
-    renderAdminStats(); renderAdminTable();
+    loadAdminData();
   }
   window.scrollTo(0, 0);
 }
@@ -1060,6 +1065,11 @@ function submitReservation() {
   const arr = getReservations();
   arr.push(rec);
   saveReservations(arr);
+  // 同步寫入 Google Sheets
+  if (SCRIPT_URL) {
+    fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'add', record: rec }) })
+      .catch(e => console.warn('Apps Script 寫入失敗', e));
+  }
   showConfirmation(rec);
   document.getElementById('form-step-3').classList.remove('active');
   document.getElementById('form-step-4').classList.add('active');
@@ -1246,6 +1256,28 @@ function switchAdminTab(tab) {
   document.getElementById('tab-reservations').className = 'btn ' + (tab === 'reservations' ? 'btn-primary' : 'btn-secondary');
   document.getElementById('tab-accounts').className     = 'btn ' + (tab === 'accounts'     ? 'btn-primary' : 'btn-secondary');
   if (tab === 'accounts') renderAccountList();
+  if (tab === 'reservations') loadAdminData();
+}
+
+async function loadAdminData() {
+  const tbody = document.getElementById('adminTableBody');
+  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--text-muted);">載入中…</td></tr>';
+  if (!SCRIPT_URL) {
+    adminCache = getReservations();
+    renderAdminStats(); renderAdminTable(); return;
+  }
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=list');
+    const data = await res.json();
+    if (data.success) {
+      adminCache = data.records.map(r => ({...r, count: String(r.count)}));
+      renderAdminStats(); renderAdminTable();
+    } else {
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--error);">讀取失敗：' + (data.error||'未知錯誤') + '</td></tr>';
+    }
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--error);">連線失敗，請確認 Apps Script 網址是否正確。</td></tr>';
+  }
 }
 
 // ── Account Management ─────────────────────────────────────────────────────────
@@ -1325,7 +1357,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function renderAdminStats() {
-  const all = getReservations();
+  const all = adminCache;
   const stats = {
     total: all.length,
     pending: all.filter(r => r.status === 'pending').length,
@@ -1343,7 +1375,7 @@ function renderAdminStats() {
 function renderAdminTable() {
   const filterStatus = document.getElementById('admin-filter-status').value;
   const search = document.getElementById('admin-search').value.toLowerCase();
-  let all = getReservations().slice().reverse();
+  let all = adminCache.slice().reverse();
   if (filterStatus) all = all.filter(r => r.status === filterStatus);
   if (search) all = all.filter(r =>
     r.org.toLowerCase().includes(search) ||
@@ -1379,20 +1411,29 @@ function renderAdminTable() {
   }).join('');
 }
 
-function updateStatus(ref, status) {
-  const all = getReservations();
-  const idx = all.findIndex(r => r.ref === ref);
+async function updateStatus(ref, status, cancelReason) {
+  // 更新 adminCache
+  const idx = adminCache.findIndex(r => r.ref === ref);
   if (idx !== -1) {
-    all[idx].status = status;
-    saveReservations(all);
-    renderAdminStats();
-    renderAdminTable();
+    adminCache[idx].status = status;
+    if (cancelReason) adminCache[idx].cancelReason = cancelReason;
+  }
+  // 同步更新 localStorage（若有）
+  const local = getReservations();
+  const li = local.findIndex(r => r.ref === ref);
+  if (li !== -1) { local[li].status = status; if (cancelReason) local[li].cancelReason = cancelReason; saveReservations(local); }
+  renderAdminStats(); renderAdminTable();
+  // 同步 Apps Script
+  if (SCRIPT_URL) {
+    try {
+      await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'update', ref, status, cancelReason: cancelReason||'' }) });
+    } catch(e) { console.warn('Apps Script 更新失敗', e); }
   }
 }
 
-function confirmReservation(ref) {
+async function confirmReservation(ref) {
   if (!confirm('確認此預約申請？\n系統將開啟 Email 通知申請者。')) return;
-  updateStatus(ref, 'confirmed');
+  await updateStatus(ref, 'confirmed');
   sendNotifyEmail(ref);
 }
 
@@ -1407,29 +1448,20 @@ function closeCancelModal() {
   _cancelRef = null;
   document.getElementById('cancelModal').classList.remove('open');
 }
-function confirmCancel() {
+async function confirmCancel() {
   const reason = document.getElementById('cancelReasonInput').value.trim();
   if (!reason) {
     document.getElementById('cancelReasonErr').textContent = '請填寫取消原因';
     return;
   }
-  // 儲存取消原因
-  const all = getReservations();
-  const idx = all.findIndex(r => r.ref === _cancelRef);
-  if (idx !== -1) {
-    all[idx].status = 'cancelled';
-    all[idx].cancelReason = reason;
-    all[idx].cancelledAt = new Date().toISOString();
-    saveReservations(all);
-    renderAdminStats();
-    renderAdminTable();
-  }
+  const ref = _cancelRef;
   closeCancelModal();
-  sendNotifyEmail(_cancelRef);
+  await updateStatus(ref, 'cancelled', reason);
+  sendNotifyEmail(ref);
 }
 
 function sendNotifyEmail(ref) {
-  const rec = getReservations().find(r => r.ref === ref);
+  const rec = adminCache.find(r => r.ref === ref) || getReservations().find(r => r.ref === ref);
   if (!rec) return;
   const statusMap = { confirmed:'已確認', cancelled:'已取消', pending:'待確認' };
   const statusLabel = statusMap[rec.status] || rec.status;
