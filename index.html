@@ -1670,17 +1670,26 @@ async function deleteSelected() {
   const checked = [...document.querySelectorAll('.row-chk:checked')].map(c => c.value);
   if (!checked.length) return;
   if (!confirm(`確定要刪除選取的 ${checked.length} 筆預約資料嗎？`)) return;
-  // 刪除 adminCache
-  adminCache = adminCache.filter(r => !checked.includes(r.ref));
-  // 刪除 localStorage
-  const local = getReservations().filter(r => !checked.includes(r.ref));
-  saveReservations(local);
-  // 刪除 Apps Script
+  // 刪除 Apps Script 先做（確保雲端刪除成功）
   if (SCRIPT_URL) {
     try {
-      await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'deleteRefs', refs: checked }) });
-    } catch(e) { console.warn('Apps Script 刪除失敗', e); }
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action:'deleteRefs', refs: checked })
+      });
+      const result = await res.json();
+      if (!result.success) {
+        alert('Google Sheets 刪除失敗：' + (result.error || '未知錯誤'));
+        return;
+      }
+    } catch(e) {
+      alert('無法連線至 Google Sheets，請檢查網路後重試。');
+      return;
+    }
   }
+  // 刪除 adminCache 和 localStorage
+  adminCache = adminCache.filter(r => !checked.includes(String(r.ref)));
+  saveReservations(getReservations().filter(r => !checked.includes(String(r.ref))));
   document.getElementById('btn-delete-selected').style.display = 'none';
   renderAdminStats(); renderAdminTable();
   alert(`已刪除 ${checked.length} 筆資料。`);
