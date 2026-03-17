@@ -726,7 +726,7 @@
         </div>
         <div class="form-group" style="margin-bottom:16px;">
           <label>密碼</label>
-          <input type="password" id="admin-pw" placeholder="請輸入密碼" autocomplete="new-password"
+          <input type="password" id="admin-pw" placeholder="請輸入密碼" autocomplete="current-password"
             onkeydown="if(event.key==='Enter')adminLogin()">
         </div>
         <button class="btn btn-primary" onclick="adminLogin()" style="width:100%;">登入</button>
@@ -804,11 +804,12 @@
             </div>
             <div class="form-group">
               <label>密碼</label>
-              <input type="password" id="new-admin-pass" placeholder="請設定密碼（至少8碼）">
+              <input type="password" id="new-admin-pass" placeholder="至少8碼，含大小寫英文及數字" autocomplete="new-password">
+              <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">密碼規則：至少 8 碼，須包含大寫字母、小寫字母及數字</div>
             </div>
             <div class="form-group">
               <label>確認密碼</label>
-              <input type="password" id="new-admin-pass2" placeholder="再次輸入密碼">
+              <input type="password" id="new-admin-pass2" placeholder="再次輸入密碼" autocomplete="new-password">
             </div>
           </div>
           <div class="field-error" id="add-account-err" style="margin-top:8px;"></div>
@@ -1354,8 +1355,11 @@ function addAdminAccount() {
   if (!name)              { err.textContent = '請輸入姓名。'; return; }
   if (!email || email.length < 3) { err.textContent = '請輸入帳號（至少3個字元）。'; return; }
   if (!/^[a-zA-Z0-9_@.\-]+$/.test(email)) { err.textContent = '帳號只能使用英文、數字及底線。'; return; }
-  if (pass.length < 8)    { err.textContent = '密碼至少需要 8 個字元。'; return; }
-  if (pass !== pass2)     { err.textContent = '兩次密碼不一致。'; return; }
+  if (pass.length < 8)             { err.textContent = '密碼至少需要 8 個字元。'; return; }
+  if (!/[A-Z]/.test(pass))        { err.textContent = '密碼須包含至少一個大寫字母（A-Z）。'; return; }
+  if (!/[a-z]/.test(pass))        { err.textContent = '密碼須包含至少一個小寫字母（a-z）。'; return; }
+  if (!/[0-9]/.test(pass))        { err.textContent = '密碼須包含至少一個數字（0-9）。'; return; }
+  if (pass !== pass2)              { err.textContent = '兩次密碼不一致。'; return; }
   const admins = getAdmins();
   if (admins.find(a => a.email.toLowerCase() === email)) { err.textContent = '此帳號已存在。'; return; }
   admins.push({ email, hash: simpleHash(pass), name, createdAt: new Date().toISOString() });
