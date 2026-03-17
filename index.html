@@ -1651,10 +1651,16 @@ function exportCSV() {
   a.click();
 }
 
-function clearAll() {
+async function clearAll() {
   if (!confirm('確定要清除所有預約資料嗎？此操作無法復原。')) return;
-  if (!confirm('再次確認：清除所有資料？')) return;
+  if (!confirm('再次確認：清除 Google Sheets 及本機所有資料？')) return;
   localStorage.removeItem(LS_KEY);
+  adminCache = [];
+  if (SCRIPT_URL) {
+    try {
+      await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'clearAll' }) });
+    } catch(e) { console.warn('Apps Script 清除失敗', e); }
+  }
   renderAdminStats();
   renderAdminTable();
   alert('所有資料已清除。');
