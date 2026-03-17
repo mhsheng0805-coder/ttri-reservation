@@ -611,22 +611,22 @@
           <div class="form-grid">
             <div class="form-group">
               <label>申請單位（機關/學校/公司）<span class="req">*</span></label>
-              <input type="text" id="f-org" placeholder="請輸入申請單位名稱">
+              <input type="text" id="f-org" placeholder="請輸入申請單位名稱" required>
               <div class="field-error" id="err-org"></div>
             </div>
             <div class="form-group">
               <label>聯絡人姓名<span class="req">*</span></label>
-              <input type="text" id="f-name" placeholder="請輸入聯絡人姓名">
+              <input type="text" id="f-name" placeholder="請輸入聯絡人姓名" required>
               <div class="field-error" id="err-name"></div>
             </div>
             <div class="form-group">
               <label>聯絡電話<span class="req">*</span></label>
-              <input type="tel" id="f-tel" placeholder="例：02-12345678 或 0912-345-678">
+              <input type="tel" id="f-tel" placeholder="例：02-12345678 或 0912-345-678" required>
               <div class="field-error" id="err-tel"></div>
             </div>
             <div class="form-group">
               <label>電子郵件<span class="req">*</span></label>
-              <input type="email" id="f-email" placeholder="example@domain.com">
+              <input type="email" id="f-email" placeholder="example@domain.com" required>
               <div class="field-error" id="err-email"></div>
             </div>
             <div class="form-group">
@@ -637,7 +637,7 @@
             </div>
             <div class="form-group">
               <label>預估參觀人數<span class="req">*</span></label>
-              <input type="number" id="f-count" min="5" placeholder="請輸入人數（至少 5 人）">
+              <input type="number" id="f-count" min="5" placeholder="請輸入人數（至少 5 人）" required>
               <div class="field-error" id="err-count"></div>
             </div>
             <div class="form-group full">
@@ -656,7 +656,7 @@
             </div>
             <div class="form-group full">
               <label>參觀目的<span class="req">*</span></label>
-              <select id="f-purpose">
+              <select id="f-purpose" required>
                 <option value="">請選擇參觀目的</option>
                 <option value="教育學習">教育學習（學校校外教學）</option>
                 <option value="業界參訪">業界參訪（廠商交流）</option>
@@ -1028,23 +1028,54 @@ function validateForm() {
 }
 
 // ── Submit ────────────────────────────────────────────────────────────────────
-function submitReservation() {
+async function submitReservation() {
   if (!validateForm()) return;
   const dateVal = document.getElementById('f-date').value;
 
-  // ── 提交前再次確認時段未被搶佔 ──────────────────────────────────────────
-  const existing = getReservations().filter(r => r.date === dateVal && r.status !== 'cancelled');
-  const slotTaken = existing.some(r => r.slot === selectedSlot);
-  if (slotTaken) {
-    const slotLabel = selectedSlot === 'morning' ? '上午（09:30–12:00）' : '下午（13:30–16:30）';
-    alert(`抱歉，${dateVal} ${slotLabel} 時段已有其他單位完成預約，\n請重新選擇日期或時段。`);
-    // 重新更新按鈕狀態
-    onDateChange();
-    selectedSlot = '';
-    document.getElementById('slot-am').classList.remove('selected');
-    document.getElementById('slot-pm').classList.remove('selected');
-    document.getElementById('err-slot').textContent = '此時段已被預約，請重新選擇';
-    return;
+  // ── 提交前從 Apps Script 即時確認時段未被搶佔 ──────────────────────────
+  const slotLabel = selectedSlot === 'morning' ? '上午（09:30–12:00）' : '下午（13:30–16:30）';
+  if (SCRIPT_URL) {
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=list');
+      const data = await res.json();
+      if (data.success) {
+        const taken = data.records.some(r =>
+          String(r.date).substring(0,10) === dateVal &&
+          r.slot === selectedSlot &&
+          r.status !== 'cancelled'
+        );
+        if (taken) {
+          alert(`抱歉，${dateVal} ${slotLabel} 時段已有其他單位完成預約，\n請重新選擇日期或時段。`);
+          onDateChange(); selectedSlot = '';
+          document.getElementById('slot-am').classList.remove('selected');
+          document.getElementById('slot-pm').classList.remove('selected');
+          document.getElementById('err-slot').textContent = '此時段已被預約，請重新選擇';
+          return;
+        }
+      }
+    } catch(e) {
+      // Apps Script 無法連線時改用 localStorage 備用檢查
+      const existing = getReservations().filter(r => r.date === dateVal && r.status !== 'cancelled');
+      if (existing.some(r => r.slot === selectedSlot)) {
+        alert(`抱歉，${dateVal} ${slotLabel} 時段已被預約，\n請重新選擇日期或時段。`);
+        onDateChange(); selectedSlot = '';
+        document.getElementById('slot-am').classList.remove('selected');
+        document.getElementById('slot-pm').classList.remove('selected');
+        document.getElementById('err-slot').textContent = '此時段已被預約，請重新選擇';
+        return;
+      }
+    }
+  } else {
+    // 無 Apps Script 時用 localStorage
+    const existing = getReservations().filter(r => r.date === dateVal && r.status !== 'cancelled');
+    if (existing.some(r => r.slot === selectedSlot)) {
+      alert(`抱歉，${dateVal} ${slotLabel} 時段已被預約，\n請重新選擇。`);
+      onDateChange(); selectedSlot = '';
+      document.getElementById('slot-am').classList.remove('selected');
+      document.getElementById('slot-pm').classList.remove('selected');
+      document.getElementById('err-slot').textContent = '此時段已被預約，請重新選擇';
+      return;
+    }
   }
   const refNo = genRef(dateVal);
   const rec = {
