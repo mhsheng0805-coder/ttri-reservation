@@ -1128,14 +1128,16 @@ async function queryByRef() {
   let rec = null;
   if (SCRIPT_URL) {
     try {
-      const res = await fetch(SCRIPT_URL + '?action=getByRef&ref=' + encodeURIComponent(ref));
+      const res = await fetch(SCRIPT_URL + '?action=list');
       const data = await res.json();
       if (data.success) {
-        rec = data.record;
-        // 同步更新 localStorage 狀態
-        const local = getReservations();
-        const li = local.findIndex(r => r.ref.toUpperCase() === ref);
-        if (li !== -1) { local[li].status = rec.status; local[li].cancelReason = rec.cancelReason; saveReservations(local); }
+        rec = data.records.find(r => String(r.ref).toUpperCase() === ref) || null;
+        if (rec) {
+          // 同步更新 localStorage 狀態
+          const local = getReservations();
+          const li = local.findIndex(r => r.ref.toUpperCase() === ref);
+          if (li !== -1) { local[li].status = rec.status; local[li].cancelReason = rec.cancelReason; saveReservations(local); }
+        }
       }
     } catch(e) { /* 若失敗改用 localStorage */ }
   }
@@ -1184,7 +1186,9 @@ async function renderRecentReservations() {
 }
 
 function renderReservationCard(rec, showCancel) {
-  const dateDisplay = rec.date.replace(/-/g, '/');
+  // 處理 Google Sheets 回傳的 ISO 日期格式（如 2026-04-01T16:00:00.000Z）
+  const dateStr = String(rec.date).length > 10 ? String(rec.date).substring(0, 10) : String(rec.date);
+  const dateDisplay = dateStr.replace(/-/g, '/');
   const statusBadge = {
     pending: '<span class="status-badge status-pending">待確認</span>',
     confirmed: '<span class="status-badge status-confirmed">已確認</span>',
@@ -1439,7 +1443,7 @@ function renderAdminTable() {
       <td>${r.name}</td>
       <td>${r.tel}</td>
       <td style="font-size:12px;"><a href="mailto:${r.email}" style="color:var(--primary);">${r.email}</a></td>
-      <td>${r.date}</td>
+      <td>${String(r.date).length > 10 ? String(r.date).substring(0,10) : r.date}</td>
       <td>${r.slot === 'morning' ? '上午' : '下午'}</td>
       <td>${r.count}</td>
       <td><span class="status-badge status-${r.status}">${statusLabel[r.status]||r.status}</span></td>
