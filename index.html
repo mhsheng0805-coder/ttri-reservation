@@ -1536,7 +1536,7 @@ function sendNotifyEmail(ref) {
   預約編號：${rec.ref}
   申請單位：${rec.org}
   聯絡人　：${rec.name}
-  參觀日期：${dateDisplay}（${rec.slot === 'morning' ? '星期' + '一二三四五六日'[new Date(rec.date).getDay()] : '星期' + '一二三四五六日'[new Date(rec.date).getDay()]}）
+  參觀日期：${dateDisplay}（${rec.slot === 'morning' ? '星期' + '日一二三四五六'[new Date(rec.date).getDay()] : '星期' + '日一二三四五六'[new Date(rec.date).getDay()]}）
   參觀時段：${rec.slotLabel}
   參觀人數：${rec.count} 人
 ──────────────────────────
