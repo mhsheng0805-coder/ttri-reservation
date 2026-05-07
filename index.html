@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -387,6 +387,29 @@
       header, nav, footer, .btn-row { display: none !important; }
       .card { box-shadow: none; border: 1px solid #ccc; }
     }
+
+    /* ── Forgot Password Modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 9999;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: #fff; border-radius: var(--radius);
+      padding: 36px; max-width: 420px; width: 90%;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    .modal-box h3 { color: var(--primary); margin-bottom: 8px; font-size: 18px; }
+    .modal-box .modal-desc { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
+    .modal-steps .step { display: none; }
+    .modal-steps .step.active { display: block; }
+    .forgot-link {
+      display: inline-block; margin-top: 10px; font-size: 13px;
+      color: var(--primary-light); cursor: pointer; text-decoration: underline;
+    }
+    .forgot-link:hover { color: var(--primary-dark); }
   </style>
 </head>
 <body>
@@ -727,6 +750,9 @@
         </div>
         <button class="btn btn-primary" onclick="adminLogin()" style="width:100%;">登入</button>
         <div id="admin-login-err" class="field-error" style="margin-top:10px;text-align:center;"></div>
+        <div>
+          <span class="forgot-link" onclick="openForgotModal()">忘記帳號或密碼？</span>
+        </div>
       </div>
     </div>
     <div id="admin-panel" style="display:none;">
@@ -832,6 +858,59 @@
     <div class="modal-btns">
       <button class="btn btn-secondary" onclick="closeCancelModal()">返回</button>
       <button class="btn btn-danger"    onclick="confirmCancel()">確定取消並通知</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 忘記密碼 Modal ── -->
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal-box">
+    <div style="font-size:36px;margin-bottom:8px;">🔑</div>
+    <h3>重設管理員密碼</h3>
+    <div class="modal-steps">
+      <!-- Step 1: 輸入重設碼 -->
+      <div class="step active" id="forgot-step1">
+        <p class="modal-desc">請輸入主管重設碼以驗證身份</p>
+        <div class="form-group" style="text-align:left;margin-bottom:12px;">
+          <label>主管重設碼</label>
+          <input type="password" id="forgot-reset-code" placeholder="請輸入重設碼"
+            onkeydown="if(event.key==='Enter')forgotVerifyCode()">
+        </div>
+        <div id="forgot-step1-err" class="field-error" style="margin-bottom:10px;"></div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-secondary" onclick="closeForgotModal()" style="flex:1;">取消</button>
+          <button class="btn btn-primary" onclick="forgotVerifyCode()" style="flex:1;">驗證</button>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:14px;">預設重設碼：<b>TTRI@Reset</b><br>如已更改請聯繫系統管理員</p>
+      </div>
+      <!-- Step 2: 選擇帳號並設定新密碼 -->
+      <div class="step" id="forgot-step2">
+        <p class="modal-desc">選擇要重設的帳號，並設定新密碼</p>
+        <div class="form-group" style="text-align:left;margin-bottom:12px;">
+          <label>選擇帳號</label>
+          <select id="forgot-account-select" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;"></select>
+        </div>
+        <div class="form-group" style="text-align:left;margin-bottom:12px;">
+          <label>新密碼</label>
+          <input type="password" id="forgot-new-pw" placeholder="至少8碼，含大小寫英文及數字">
+        </div>
+        <div class="form-group" style="text-align:left;margin-bottom:12px;">
+          <label>確認新密碼</label>
+          <input type="password" id="forgot-new-pw2" placeholder="再次輸入新密碼"
+            onkeydown="if(event.key==='Enter')forgotResetPassword()">
+        </div>
+        <div id="forgot-step2-err" class="field-error" style="margin-bottom:10px;"></div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-secondary" onclick="closeForgotModal()" style="flex:1;">取消</button>
+          <button class="btn btn-primary" onclick="forgotResetPassword()" style="flex:1;">重設密碼</button>
+        </div>
+      </div>
+      <!-- Step 3: 成功 -->
+      <div class="step" id="forgot-step3">
+        <div style="font-size:48px;margin-bottom:12px;">✅</div>
+        <p class="modal-desc" style="font-size:15px;color:var(--success);">密碼已成功重設！<br>請使用新密碼重新登入。</p>
+        <button class="btn btn-primary" onclick="closeForgotModal()" style="width:100%;margin-top:8px;">關閉</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1301,6 +1380,58 @@ function adminLogout() {
   document.getElementById('admin-login-err').textContent = '';
 }
 
+// ── Forgot Password ────────────────────────────────────────────────────────────
+const FORGOT_RESET_CODE = 'TTRI@Reset';
+
+function openForgotModal() {
+  document.getElementById('forgot-reset-code').value = '';
+  document.getElementById('forgot-new-pw').value = '';
+  document.getElementById('forgot-new-pw2').value = '';
+  document.getElementById('forgot-step1-err').textContent = '';
+  document.getElementById('forgot-step2-err').textContent = '';
+  ['forgot-step1','forgot-step2','forgot-step3'].forEach((id,i) => {
+    document.getElementById(id).classList.toggle('active', i === 0);
+  });
+  document.getElementById('forgotModal').classList.add('active');
+}
+
+function closeForgotModal() {
+  document.getElementById('forgotModal').classList.remove('active');
+}
+
+function forgotVerifyCode() {
+  const code = document.getElementById('forgot-reset-code').value;
+  if (code !== FORGOT_RESET_CODE) {
+    document.getElementById('forgot-step1-err').textContent = '重設碼錯誤，請重試。';
+    return;
+  }
+  // 填入帳號列表
+  const admins = getAdmins();
+  const sel = document.getElementById('forgot-account-select');
+  sel.innerHTML = admins.map(a => `<option value="${a.email}">${a.name}（${a.email}）</option>`).join('');
+  document.getElementById('forgot-step1').classList.remove('active');
+  document.getElementById('forgot-step2').classList.add('active');
+}
+
+function forgotResetPassword() {
+  const email = document.getElementById('forgot-account-select').value;
+  const pw1 = document.getElementById('forgot-new-pw').value;
+  const pw2 = document.getElementById('forgot-new-pw2').value;
+  const errEl = document.getElementById('forgot-step2-err');
+  if (!pw1) { errEl.textContent = '請輸入新密碼。'; return; }
+  if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}/.test(pw1)) {
+    errEl.textContent = '密碼須至少 8 碼，並包含大寫、小寫英文及數字。'; return;
+  }
+  if (pw1 !== pw2) { errEl.textContent = '兩次輸入的密碼不一致。'; return; }
+  const admins = getAdmins();
+  const idx = admins.findIndex(a => a.email === email);
+  if (idx === -1) { errEl.textContent = '找不到該帳號。'; return; }
+  admins[idx].hash = simpleHash(pw1);
+  saveAdmins(admins);
+  document.getElementById('forgot-step2').classList.remove('active');
+  document.getElementById('forgot-step3').classList.add('active');
+}
+
 // ── Admin Tabs ─────────────────────────────────────────────────────────────────
 function switchAdminTab(tab) {
   document.getElementById('admin-tab-reservations').style.display = tab === 'reservations' ? 'block' : 'none';
@@ -1715,3 +1846,4 @@ updateStepUI(1);
 </script>
 </body>
 </html>
+
