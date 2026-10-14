@@ -231,6 +231,8 @@
     .pw-toggle:hover { background: var(--bg); }
     .pw-toggle.on { color: var(--primary); }
     .modal-box.wide { max-width: 640px; max-height: 90vh; overflow-y: auto; }
+    .modal-box .form-grid > *, .modal-box .form-group > div > * { min-width: 0; }
+    .modal-box .form-group > input, .modal-box .form-group > select, .modal-box .form-group > textarea { width: 100%; }
     .staff-group { margin-top: 14px; }
     .staff-group h4, .staff-group summary { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; cursor: default; }
     .staff-group summary { cursor: pointer; }
@@ -347,7 +349,14 @@
     .status-pending  { background: #fff3cd; color: #856404; }
     .status-confirmed { background: #d1e7dd; color: #0a3622; }
     .status-cancelled { background: #f8d7da; color: #58151c; }
-    .action-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+    .status-closed   { background: #e2e6ee; color: #3d4a5c; }
+    .action-btns { display: grid; grid-template-columns: repeat(2, max-content); gap: 4px; }
+    .action-btns button { white-space: nowrap; }
+    .btn-close  { background:#3d4a5c;color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer; }
+    .btn-close:hover { background:#2b3442; }
+    .btn-edit   { background:#fff;color:var(--primary);border:1px solid var(--primary);padding:3px 9px;border-radius:6px;font-size:11px;cursor:pointer; }
+    .btn-edit:hover { background:#ebf2fd; }
+    .reservation-item.closed { border-left-color: #8a96a8; }
     .btn-confirm { background:#198754;color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer; }
     .btn-confirm:hover { background:#157347; }
     .btn-reject  { background:#dc3545;color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer; }
@@ -357,7 +366,7 @@
     .btn-detail  { background:#6c757d;color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer; }
     .btn-detail:hover  { background:#565e64; }
     .admin-stats {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px;
     }
     .stat-card {
       background: var(--card); border-radius: var(--radius); padding: 16px 20px;
@@ -836,6 +845,7 @@
                 <option value="pending">待確認</option>
                 <option value="confirmed">已確認</option>
                 <option value="cancelled">已取消</option>
+                <option value="closed">已結案</option>
               </select>
             </div>
             <input type="text" id="admin-search" placeholder="搜尋單位/聯絡人..." oninput="renderAdminTable()" style="flex:1;max-width:240px;">
@@ -1002,6 +1012,43 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box wide">
+    <h3>&#9998; 編輯預約 <span id="e-ref" style="font-size:13px;color:var(--text-muted);font-weight:400;"></span></h3>
+    <p>管理員編輯不受「7 天前預約」與「2 小時上限」限制，但仍會檢查開放時間、午休與時間重疊。預約編號不會改變。</p>
+    <div class="form-grid">
+      <div class="form-group"><label>參訪場區</label>
+        <select id="e-site"><option value="tucheng">土城場區</option><option value="douliu">斗六場區</option></select></div>
+      <div class="form-group"><label>狀態</label>
+        <select id="e-status" onchange="onEditFieldChange()"><option value="pending">待確認</option><option value="confirmed">已確認</option>
+          <option value="cancelled">已取消</option><option value="closed">已結案</option></select></div>
+      <div class="form-group full" id="e-cancel-group"><label>取消原因</label><input type="text" id="e-cancel-reason"></div>
+      <div class="form-group"><label>參觀日期</label><input type="date" id="e-date"></div>
+      <div class="form-group"><label>參觀時間</label>
+        <div style="display:flex;gap:8px;align-items:center;"><select id="e-start" style="flex:1;"></select>至<select id="e-end" style="flex:1;"></select></div></div>
+      <div class="form-group"><label>申請單位</label><input type="text" id="e-org"></div>
+      <div class="form-group"><label>聯絡人</label><input type="text" id="e-name"></div>
+      <div class="form-group"><label>電話</label>
+        <div style="display:flex;gap:8px;align-items:center;"><input type="tel" id="e-tel" style="flex:1;min-width:0;">分機<input type="text" id="e-tel-ext" style="width:80px;"></div></div>
+      <div class="form-group"><label>手機</label><input type="tel" id="e-mobile"></div>
+      <div class="form-group"><label>E-Mail</label><input type="email" id="e-email"></div>
+      <div class="form-group"><label>參觀人數</label><input type="number" id="e-count" min="1"></div>
+      <div class="form-group"><label>參觀目的</label><input type="text" id="e-purpose" list="e-purpose-list">
+        <datalist id="e-purpose-list"><option value="教育學習"><option value="業界參訪"><option value="政府機關"><option value="學術研究"></datalist></div>
+      <div class="form-group"><label>交通方式</label>
+        <select id="e-transport" onchange="onEditFieldChange()"><option value="">（未填）</option><option value="遊覽車">遊覽車</option>
+          <option value="自行開車">自行開車</option><option value="大眾運輸">大眾運輸</option></select></div>
+      <div class="form-group" id="e-bus-group"><label>遊覽車車號</label><input type="text" id="e-bus"></div>
+      <div class="form-group full"><label>備註</label><textarea id="e-notes" style="min-height:60px;"></textarea></div>
+    </div>
+    <div id="e-err" class="field-error" style="margin-top:8px;"></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="document.getElementById('editModal').classList.remove('open')">取消</button>
+      <button class="btn btn-primary" id="e-save" onclick="saveEditRes()">儲存</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="visitorCancelModal">
   <div class="modal-box">
     <h3>&#10060; 取消預約</h3>
@@ -1105,6 +1152,7 @@ function overlapping(records, date, site, start, end) {
   });
 }
 
+const STATUS_ZH = { pending:'待確認', confirmed:'已確認', cancelled:'已取消', closed:'已結案' };
 const pages = ['home','rules','reserve','query','admin'];
 function showPage(id) {
   pages.forEach(p => {
@@ -1176,6 +1224,9 @@ function toISO(d) {
 function initTimeSelects() {
   const startSel = document.getElementById('f-start'), endSel = document.getElementById('f-end');
   if (startSel.options.length) return;
+  fillTimeSelects(startSel, endSel);
+}
+function fillTimeSelects(startSel, endSel) {
   // 上午、下午分組列出；午休時段不列入
   const group = (label, from, to) => {
     let html = `<optgroup label="${label}">`;
@@ -1497,15 +1548,16 @@ function renderReservationCard(rec) {
   const statusBadge = {
     pending: '<span class="status-badge status-pending">待確認</span>',
     confirmed: '<span class="status-badge status-confirmed">已確認</span>',
-    cancelled: '<span class="status-badge status-cancelled">已取消</span>'
+    cancelled: '<span class="status-badge status-cancelled">已取消</span>',
+    closed: '<span class="status-badge status-closed">已結案</span>'
   }[rec.status] || '';
   // 參觀日 2 日前可線上取消；1 日內請來電
-  const cancelBtn = rec.status === 'cancelled' ? ''
+  const cancelBtn = (rec.status === 'cancelled' || rec.status === 'closed') ? ''
     : daysUntil(rec.date) >= CANCEL_DAYS
       ? `<button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;" onclick="cancelReservation('${esc(rec.ref)}')">取消預約</button>`
       : `<div style="font-size:12px;color:var(--text-muted);text-align:right;line-height:1.6;">參觀日前 1 日內如需取消<br>請來電 ${CONTACT_TEL}</div>`;
   return `
-    <div class="reservation-item ${rec.status === 'cancelled' ? 'cancelled' : ''}">
+    <div class="reservation-item ${rec.status === 'cancelled' || rec.status === 'closed' ? rec.status : ''}">
       <div class="ri-info">
         <div class="ref">預約編號：${esc(rec.ref)} ${siteTag(rec)}</div>
         <div class="name">${esc(rec.org)}</div>
@@ -1680,7 +1732,8 @@ function renderAdminStats() {
     total: all.length,
     pending: all.filter(r => r.status === 'pending').length,
     confirmed: all.filter(r => r.status === 'confirmed').length,
-    cancelled: all.filter(r => r.status === 'cancelled').length
+    cancelled: all.filter(r => r.status === 'cancelled').length,
+    closed: all.filter(r => r.status === 'closed').length
   };
   const el = document.getElementById('adminStats');
   if (el) {
@@ -1689,6 +1742,7 @@ function renderAdminStats() {
       <div class="stat-card"><div class="num" style="color:var(--warning)">${stats.pending}</div><div class="lbl">待確認</div></div>
       <div class="stat-card"><div class="num" style="color:var(--success)">${stats.confirmed}</div><div class="lbl">已確認</div></div>
       <div class="stat-card"><div class="num" style="color:var(--error)">${stats.cancelled}</div><div class="lbl">已取消</div></div>
+      <div class="stat-card"><div class="num" style="color:#3d4a5c">${stats.closed}</div><div class="lbl">已結案</div></div>
     `;
   }
 }
@@ -1702,7 +1756,7 @@ function renderAdminTable() {
     tbody.innerHTML = `<tr><td colspan="${ADMIN_COLS}" style="text-align:center;color:var(--text-muted);padding:24px;">無資料</td></tr>`;
     return;
   }
-  const statusLabel = { pending:'待確認', confirmed:'已確認', cancelled:'已取消' };
+  const statusLabel = STATUS_ZH;
   tbody.innerHTML = all.map(r => `
     <tr>
       <td><input type="checkbox" class="row-chk" value="${esc(r.ref)}" onchange="updateDeleteBtn()"></td>
@@ -1718,8 +1772,10 @@ function renderAdminTable() {
       <td><span class="status-badge status-${esc(r.status)}">${statusLabel[r.status] || esc(r.status)}</span></td>
       <td>
         <div class="action-btns">
-          <button class="btn-confirm" onclick="confirmRes('${esc(r.ref)}')">&#9989; 確認</button>
-          <button class="btn-reject"  onclick="cancelRes('${esc(r.ref)}')">&#10060; 取消</button>
+          ${r.status === 'pending' ? `<button class="btn-confirm" onclick="confirmRes('${esc(r.ref)}')">&#9989; 確認</button>` : ''}
+          ${r.status === 'confirmed' ? `<button class="btn-close" onclick="closeRes('${esc(r.ref)}')" title="參訪完成，結案">&#127937; 結案</button>` : ''}
+          ${r.status === 'pending' || r.status === 'confirmed' ? `<button class="btn-reject" onclick="cancelRes('${esc(r.ref)}')">&#10060; 取消</button>` : ''}
+          <button class="btn-edit" onclick="openEditRes('${esc(r.ref)}')">&#9998; 編輯</button>
           <button class="btn-notify" onclick="sendNotifyEmail('${esc(r.ref)}')" title="寄信給申請單位">&#128231; 通知申請人</button>
           <button class="btn-detail" onclick="openStaffNotify('${esc(r.ref)}')" title="勾選紡織所同仁寄送通知">&#128101; 通知同仁</button>
         </div>
@@ -1732,6 +1788,55 @@ function renderAdminTable() {
 async function confirmRes(ref) {
   if (confirm('確認此預約？')) {
     await updateStatus(ref, 'confirmed');
+  }
+}
+
+async function closeRes(ref) {
+  const r = adminCache.find(x => x.ref === ref);
+  if (r && confirm(`將「${r.org}」${dateOnly(r.date)} 的參訪標記為已結案？`)) {
+    await updateStatus(ref, 'closed');
+  }
+}
+
+// 編輯預約
+let _editRef = null;
+function openEditRes(ref) {
+  const r = adminCache.find(x => x.ref === ref);
+  if (!r) return;
+  _editRef = ref;
+  const $ = id => document.getElementById(id);
+  fillTimeSelects($('e-start'), $('e-end'));
+  const t = timeRange(r) || ['', ''];
+  const vals = { 'e-site': siteOf(r), 'e-date': dateOnly(r.date), 'e-start': t[0], 'e-end': t[1], 'e-org': r.org, 'e-name': r.name,
+    'e-tel': r.tel, 'e-tel-ext': r.telExt, 'e-mobile': r.mobile, 'e-email': r.email, 'e-count': r.count, 'e-purpose': r.purpose,
+    'e-transport': r.transport, 'e-bus': r.busPlate, 'e-notes': r.notes, 'e-status': r.status || 'pending', 'e-cancel-reason': r.cancelReason };
+  Object.keys(vals).forEach(id => { $(id).value = vals[id] == null ? '' : String(vals[id]); });
+  $('e-ref').textContent = r.ref;
+  $('e-err').textContent = '';
+  onEditFieldChange();
+  $('editModal').classList.add('open');
+}
+function onEditFieldChange() {
+  const $ = id => document.getElementById(id);
+  $('e-bus-group').style.display = $('e-transport').value === '遊覽車' ? '' : 'none';
+  $('e-cancel-group').style.display = $('e-status').value === 'cancelled' ? '' : 'none';
+}
+async function saveEditRes() {
+  const $ = id => document.getElementById(id);
+  const record = { site: $('e-site').value, date: $('e-date').value, startTime: $('e-start').value, endTime: $('e-end').value,
+    org: $('e-org').value, name: $('e-name').value, tel: $('e-tel').value, telExt: $('e-tel-ext').value, mobile: $('e-mobile').value,
+    email: $('e-email').value, count: $('e-count').value, purpose: $('e-purpose').value, transport: $('e-transport').value,
+    busPlate: $('e-bus').value, notes: $('e-notes').value, status: $('e-status').value, cancelReason: $('e-cancel-reason').value };
+  const btn = $('e-save');
+  btn.disabled = true; btn.textContent = '儲存中…';
+  try {
+    await adminApi('edit', { ref: _editRef, record });
+    $('editModal').classList.remove('open');
+    loadAdminData();
+  } catch(e) {
+    $('e-err').textContent = '儲存失敗：' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = '儲存';
   }
 }
 
@@ -1765,7 +1870,7 @@ function closeCancelModal() {
 function sendNotifyEmail(ref) {
   const rec = adminCache.find(r => r.ref === ref);
   if (!rec) return;
-  const statusMap = { confirmed:'已確認', cancelled:'已取消', pending:'待確認' };
+  const statusMap = STATUS_ZH;
   const dateDisplay = dateOnly(rec.date).replace(/-/g, '/');
   const subject = `【紡織印象館】參訪預約通知 – 編號 ${rec.ref}`;
   const body =
@@ -1790,7 +1895,6 @@ E-Mail：service@ttri.org.tw
   window.open(`mailto:${rec.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
 }
 
-const STATUS_ZH = { pending:'待確認', confirmed:'已確認', cancelled:'已取消' };
 function exportRows() {
   return getFilteredAdmin().map(r => ({
     '預約編號': r.ref,
@@ -1983,7 +2087,7 @@ async function openStaffNotify(ref) {
   const r = adminCache.find(x => x.ref === ref);
   if (!r) return;
   _notifyRef = ref;
-  const statusLabel = { pending:'待確認', confirmed:'已確認', cancelled:'已取消' };
+  const statusLabel = STATUS_ZH;
   document.getElementById('sn-summary').innerHTML =
     `${siteTag(r)} <strong>${esc(r.org)}</strong>（${esc(r.name)}）<br>` +
     `${esc(dateOnly(r.date))} ${esc(timeLabel(r))}｜${esc(r.count)} 人｜${esc(r.purpose)}｜${statusLabel[r.status] || esc(r.status)}` +
