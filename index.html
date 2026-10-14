@@ -1406,6 +1406,12 @@ function validatePhones() {
   return !telErr && !mobileErr;
 }
 // 電話＋分機，例：02-22670321 #6007
+// 台灣電話一律 0 開頭：全數字但不是 0 開頭的（舊資料被試算表吃掉 0），補回 0
+function fixPhone(v) {
+  const s = String(v == null ? '' : v).trim();
+  return /^[1-9]\d{7,9}$/.test(s) ? '0' + s : s;
+}
+
 function telLabel(r) {
   return r.tel ? (r.telExt ? `${r.tel} #${r.telExt}` : String(r.tel)) : '';
 }
@@ -1737,7 +1743,7 @@ async function loadAdminData() {
   tbody.innerHTML = `<tr><td colspan="${ADMIN_COLS}" style="text-align:center;padding:24px;">載入中…</td></tr>`;
   try {
     const data = await adminApi('list');
-    adminCache = data.records;
+    adminCache = data.records.map(r => Object.assign(r, { tel: fixPhone(r.tel), mobile: fixPhone(r.mobile) }));
     if (data.contacts) siteContacts = data.contacts;
     if (data.renamed && data.renamed.length) {
       alert('發現舊系統產生的重複預約編號，已自動修正：\n\n' +
