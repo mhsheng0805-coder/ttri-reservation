@@ -339,7 +339,7 @@
     #adminTable td.c-when { white-space: nowrap; }
     #adminTable td.c-actions { width: 210px; }
     .muted { color: var(--text-muted); }
-    .contact-grid { display: grid; grid-template-columns: 110px 1fr 1.2fr; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .contact-grid { display: grid; grid-template-columns: 100px 0.7fr 1fr 1.2fr; gap: 10px; align-items: center; margin-bottom: 10px; }
     @media (max-width: 760px) { .contact-grid { grid-template-columns: 1fr; } }
     .admin-table th {
       background: var(--primary); color: #fff;
@@ -883,11 +883,13 @@
       <div id="admin-tab-staff" style="display:none;">
         <div class="card">
           <div class="card-title"><span class="icon">&#9742;</span>場區聯絡窗口</div>
-          <p class="hint" style="margin-bottom:14px;">按「&#128231; 通知申請人」寄給申請者的信，以及申請者線上取消的確認信，會帶入該場區的聯絡電話與 E-Mail。斗六場區未填時，會改用土城的聯絡方式。</p>
+          <p class="hint" style="margin-bottom:14px;">按「&#128231; 通知申請人」寄給申請者的信，以及申請者線上取消的確認信，會帶入該場區的聯絡人、電話與 E-Mail。斗六場區未填時，會改用土城的聯絡方式。</p>
           <div class="contact-grid"><strong>土城場區</strong>
+            <input type="text" id="ct-tucheng-name" placeholder="聯絡人姓名">
             <input type="text" id="ct-tucheng-tel" placeholder="電話，例：02-22670321 分機 6007">
             <input type="email" id="ct-tucheng-email" placeholder="E-Mail"></div>
           <div class="contact-grid"><strong>斗六場區</strong>
+            <input type="text" id="ct-douliu-name" placeholder="聯絡人姓名">
             <input type="text" id="ct-douliu-tel" placeholder="電話，例：05-5574000 分機 0000">
             <input type="email" id="ct-douliu-email" placeholder="E-Mail"></div>
           <div class="field-error" id="ct-err"></div>
@@ -1904,9 +1906,14 @@ function closeCancelModal() {
 
 // 各場區聯絡窗口（後台「同仁名單」頁設定）；未設定時用土城（總所）的聯絡方式
 let siteContacts = { tucheng: { tel: '02-22670321 分機 6007', email: 'service@ttri.org.tw' }, douliu: { tel: '', email: '' } };
-function contactLines(site) {
+function siteContactOf(site) {
   const c = siteContacts[site] || {}, d = siteContacts.tucheng || {};
-  return `電　話：${c.tel || d.tel || ''}\nE-Mail：${c.email || d.email || ''}`;
+  return (c.tel || c.email) ? { name: c.name || '', tel: c.tel || d.tel || '', email: c.email || d.email || '' }
+                            : { name: d.name || '', tel: d.tel || '', email: d.email || '' };
+}
+function contactLines(site) {
+  const c = siteContactOf(site);
+  return (c.name ? `聯絡人：${c.name}\n` : '') + `電　話：${c.tel}\nE-Mail：${c.email}`;
 }
 
 // 通知申請人：先選這封信的主要聯絡人（場區聯絡窗口或該場區同仁），再開啟郵件程式
@@ -1927,8 +1934,8 @@ async function sendNotifyEmail(ref) {
   list.innerHTML = '<p class="muted" style="padding:8px 0;">載入同仁名單…</p>';
   document.getElementById('applicantNotifyModal').classList.add('open');
   try { await fetchStaff(); } catch(e) { /* 讀不到同仁名單時，仍可選場區聯絡窗口 */ }
-  const c = siteContacts[site] || {}, d = siteContacts.tucheng || {};
-  const options = [{ id: 'site', label: `${SITES[site].full} 聯絡窗口`, sub: [c.tel || d.tel, c.email || d.email].filter(Boolean).join('｜') }]
+  const c = siteContactOf(site);
+  const options = [{ id: 'site', label: `${SITES[site].full} 聯絡窗口${c.name ? '：' + c.name : ''}`, sub: [c.tel, c.email].filter(Boolean).join('｜') }]
     .concat(staffCache.filter(x => x.site === site || x.site === 'both').map(x => ({
       id: x.id, label: x.name + (x.unit ? `（${x.unit}）` : ''), sub: [x.phone, x.email].filter(Boolean).join('｜') })));
   const picked = options.some(o => o.id === contactPickGet(site)) ? contactPickGet(site) : 'site';
@@ -1967,7 +1974,7 @@ ${rec.status === 'cancelled' && rec.cancelReason ? `  取消原因：${rec.cance
 
 ${contactText}
 
-財團法人紡織產業綜合研究所 · 紡織印象館`;
+財團法人紡織產業綜合研究所`;
   window.open(`mailto:${rec.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
   document.getElementById('applicantNotifyModal').classList.remove('open');
 }
@@ -2064,6 +2071,7 @@ async function loadContacts() {
     siteContacts = (await adminApi('getContacts')).contacts;
   } catch(e) { return; }
   Object.keys(SITES).forEach(site => {
+    document.getElementById(`ct-${site}-name`).value = (siteContacts[site] && siteContacts[site].name) || '';
     document.getElementById(`ct-${site}-tel`).value = (siteContacts[site] && siteContacts[site].tel) || '';
     document.getElementById(`ct-${site}-email`).value = (siteContacts[site] && siteContacts[site].email) || '';
   });
@@ -2072,7 +2080,8 @@ async function loadContacts() {
 async function saveContacts() {
   const contacts = {};
   Object.keys(SITES).forEach(site => {
-    contacts[site] = { tel: document.getElementById(`ct-${site}-tel`).value.trim(),
+    contacts[site] = { name: document.getElementById(`ct-${site}-name`).value.trim(),
+                       tel: document.getElementById(`ct-${site}-tel`).value.trim(),
                        email: document.getElementById(`ct-${site}-email`).value.trim() };
   });
   const err = document.getElementById('ct-err'), btn = document.getElementById('btn-save-contacts');
