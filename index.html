@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>財團法人紡織產業綜合研究所 · 紡織印象館線上參訪預約</title>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
       --primary: #1B4B8A;
@@ -69,6 +69,8 @@
     }
     .nav-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
     .nav-btn.active { background: rgba(255,255,255,0.22); color: #fff; font-weight: 600; }
+    .nav-btn.nav-admin { margin-left: 8px; border: 1px solid rgba(255,255,255,0.35); font-size: 13px; }
+    .footer-admin { color: rgba(255,255,255,0.6); font-size: 12px; cursor: pointer; background: none; border: none; font-family: inherit; text-decoration: underline; }
 
     /* ── Main ── */
     main { flex: 1; max-width: 1100px; margin: 32px auto; padding: 0 20px; width: 100%; }
@@ -98,7 +100,7 @@
       position: relative; overflow: hidden;
     }
     .hero::before {
-      content: '🧵';
+      content: '\1F9F5';
       position: absolute; right: 40px; top: 20px;
       font-size: 100px; opacity: 0.12;
     }
@@ -208,6 +210,43 @@
     .slot-btn .slot-time { font-size: 13px; color: var(--text-muted); display: block; margin-top: 3px; }
     .slot-btn.selected .slot-time { color: var(--primary-light); }
     .slot-btn.full { opacity: 0.5; cursor: not-allowed; background: #f5f5f5; }
+    .time-range { display: flex; align-items: center; gap: 10px; }
+    .tel-row { display: flex; align-items: center; gap: 8px; }
+    .tel-row #f-tel { flex: 1; min-width: 0; }
+    .tel-row #f-tel-ext { width: 88px; flex: none; }
+    .tel-row span { white-space: nowrap; font-size: 14px; color: var(--text-muted); }
+    .time-range select { flex: 1; }
+    #booked-times { color: var(--warning); }
+    .site-tag { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .site-tucheng { background:#e3edfb; color:#1B4B8A; }
+    .site-douliu  { background:#fdeedd; color:#9a5300; }
+    .site-both    { background:#ece8f6; color:#5b3e99; }
+    .pw-wrap { position: relative; display: block; }
+    .pw-wrap input { width: 100%; padding-right: 44px; }
+    .pw-toggle {
+      position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; padding: 4px 6px;
+      font-size: 17px; line-height: 1; color: var(--text-muted); border-radius: 6px;
+    }
+    .pw-toggle:hover { background: var(--bg); }
+    .pw-toggle.on { color: var(--primary); }
+    .modal-box.wide { max-width: 640px; max-height: 90vh; overflow-y: auto; }
+    .staff-group { margin-top: 14px; }
+    .staff-group h4, .staff-group summary { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; cursor: default; }
+    .staff-group summary { cursor: pointer; }
+    .staff-pick { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+    .staff-item {
+      display:flex; align-items:flex-start; gap:8px; padding:9px 12px; cursor:pointer;
+      border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-weight:400;
+    }
+    .staff-item:has(input:checked) { border-color: var(--primary); background: #ebf2fd; }
+    .staff-item input { margin-top:2px; width:16px; height:16px; accent-color: var(--primary); flex-shrink:0; }
+    .staff-item .sub { display:block; color:var(--text-muted); font-size:11px; margin-top:2px; }
+    .res-summary { background: var(--bg); border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.8; }
+    .notified-note { font-size: 11px; color: var(--success); margin-top: 5px; }
+    .chk-inline { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:400; cursor:pointer; }
+    .chk-inline input { width:16px; height:16px; accent-color: var(--primary); }
+    @media (max-width: 760px) { .staff-pick { grid-template-columns: 1fr; } }
 
     .checkbox-group { display: flex; align-items: flex-start; gap: 10px; }
     .checkbox-group input[type="checkbox"] {
@@ -387,29 +426,6 @@
       header, nav, footer, .btn-row { display: none !important; }
       .card { box-shadow: none; border: 1px solid #ccc; }
     }
-
-    /* ── Forgot Password Modal ── */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.45); z-index: 9999;
-      align-items: center; justify-content: center;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal-box {
-      background: #fff; border-radius: var(--radius);
-      padding: 36px; max-width: 420px; width: 90%;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.2);
-      text-align: center;
-    }
-    .modal-box h3 { color: var(--primary); margin-bottom: 8px; font-size: 18px; }
-    .modal-box .modal-desc { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
-    .modal-steps .step { display: none; }
-    .modal-steps .step.active { display: block; }
-    .forgot-link {
-      display: inline-block; margin-top: 10px; font-size: 13px;
-      color: var(--primary-light); cursor: pointer; text-decoration: underline;
-    }
-    .forgot-link:hover { color: var(--primary-dark); }
   </style>
 </head>
 <body>
@@ -417,7 +433,7 @@
 <header>
   <div class="header-inner">
     <div class="logo">
-      <div class="logo-icon">🧵</div>
+      <div class="logo-icon">&#129525;</div>
       <div class="logo-text">
         <div class="org">財團法人紡織產業綜合研究所</div>
         <div class="name">紡織印象館 線上參訪預約</div>
@@ -428,63 +444,63 @@
       <button class="nav-btn" onclick="showPage('rules')">預約說明</button>
       <button class="nav-btn" onclick="showPage('reserve')">立即預約</button>
       <button class="nav-btn" onclick="showPage('query')">查詢預約</button>
+      <button class="nav-btn nav-admin" onclick="showPage('admin')" title="管理員登入">&#128272; 後台管理</button>
     </nav>
   </div>
 </header>
 
 <main>
 
-  <!-- ═══════════════════════════════════════ HOME ═══════════════════════════════════════ -->
   <div id="page-home" class="page active">
     <div class="hero">
       <h1>歡迎蒞臨紡織印象館</h1>
       <p>紡織印象館提供團體參訪預約服務，透過線上預約系統，讓您輕鬆完成申請，暢遊台灣紡織產業的精彩世界。</p>
-      <button class="hero-btn" onclick="showPage('reserve')">立即線上預約 →</button>
+      <button class="hero-btn" onclick="showPage('reserve')">立即線上預約 &#8594;</button>
     </div>
     <div class="info-grid">
       <div class="info-card">
-        <div class="ic-label">📅 開放時段</div>
+        <div class="ic-label">&#128197; 開放時段</div>
         <div class="ic-value">週一至週五</div>
         <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">
-          上午 09:30–12:00<br>下午 13:30–16:30
+          09:30–12:00、13:30–16:30<br>參觀時間可自行選擇（12:00–13:00 午休）
         </div>
       </div>
       <div class="info-card">
-        <div class="ic-label">👥 參觀人數</div>
+        <div class="ic-label">&#128101; 參觀人數</div>
         <div class="ic-value">以團體參觀為主，至少 5 人以上</div>
         <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">
           每次參觀以 2 小時為上限
         </div>
       </div>
       <div class="info-card">
-        <div class="ic-label">📞 聯絡窗口</div>
-        <div class="ic-value">尚小姐</div>
+        <div class="ic-label">&#128222; 聯絡窗口</div>
+        <div class="ic-value">02-22670321 分機 6007</div>
         <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">
-          02-22670321 分機 6003<br>mhsheng.0805@ttri.org.tw
+          service@ttri.org.tw
         </div>
       </div>
     </div>
     <div class="card">
-      <div class="card-title"><span class="icon">📋</span>預約流程</div>
+      <div class="card-title"><span class="icon">&#128203;</span>預約流程</div>
       <div style="display:flex;gap:0;align-items:flex-start;flex-wrap:wrap;">
         <div style="flex:1;min-width:160px;text-align:center;padding:12px;">
           <div style="width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 10px;">1</div>
           <div style="font-weight:700;margin-bottom:4px;">閱讀預約說明</div>
           <div style="font-size:13px;color:var(--text-muted);">確認開放時間與注意事項</div>
         </div>
-        <div style="flex:0;padding-top:30px;font-size:22px;color:var(--border);">›</div>
+        <div style="flex:0;padding-top:30px;font-size:22px;color:var(--border);">&#8250;</div>
         <div style="flex:1;min-width:160px;text-align:center;padding:12px;">
           <div style="width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 10px;">2</div>
           <div style="font-weight:700;margin-bottom:4px;">同意個資聲明</div>
           <div style="font-size:13px;color:var(--text-muted);">確認個人資料使用說明</div>
         </div>
-        <div style="flex:0;padding-top:30px;font-size:22px;color:var(--border);">›</div>
+        <div style="flex:0;padding-top:30px;font-size:22px;color:var(--border);">&#8250;</div>
         <div style="flex:1;min-width:160px;text-align:center;padding:12px;">
           <div style="width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 10px;">3</div>
           <div style="font-weight:700;margin-bottom:4px;">填寫預約資料</div>
-          <div style="font-size:13px;color:var(--text-muted);">選擇日期、時段並填寫資料</div>
+          <div style="font-size:13px;color:var(--text-muted);">選擇日期、時間並填寫資料</div>
         </div>
-        <div style="flex:0;padding-top:30px;font-size:22px;color:var(--border);">›</div>
+        <div style="flex:0;padding-top:30px;font-size:22px;color:var(--border);">&#8250;</div>
         <div style="flex:1;min-width:160px;text-align:center;padding:12px;">
           <div style="width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 10px;">4</div>
           <div style="font-weight:700;margin-bottom:4px;">完成預約</div>
@@ -493,52 +509,58 @@
       </div>
     </div>
     <div class="alert alert-warning">
-      ⚠️ <span>如參觀日遇政府發布颱風警報、補假日或調整放假日均暫停辦理，請留意氣象公告。</span>
+      &#9888; <span>如參觀日遇政府發布颱風警報、補假日或調整放假日均暫停辦理，請留意氣象公告。</span>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════ RULES ═══════════════════════════════════════ -->
   <div id="page-rules" class="page">
     <div class="card">
-      <div class="card-title"><span class="icon">📌</span>預約方式與規定</div>
+      <div class="card-title"><span class="icon">&#128204;</span>預約方式與規定</div>
       <div class="rule-section">
-        <h3>① 開放時間</h3>
+        <h3>&#128205; 參訪場區</h3>
         <ul class="rule-list">
-          <li>週一至週五：上午時段 <strong>09:30–12:00</strong>、下午時段 <strong>13:30–16:30</strong></li>
+          <li>本館分為 <strong>紡織所土城場區</strong> 及 <strong>紡織所斗六場區</strong>，預約時請選擇欲參訪之場區</li>
+          <li>兩場區各自獨立開放預約，同一場區同一時間限一個團體</li>
+        </ul>
+      </div>
+      <div class="rule-section">
+        <h3>&#9312; 開放時間</h3>
+        <ul class="rule-list">
+          <li>週一至週五 <strong>09:30–12:00</strong>、<strong>13:30–16:30</strong>，參觀時間可於此範圍內自行選擇（12:00–13:00 午休不開放）</li>
           <li>每次參觀以 <strong>2 小時</strong>為上限</li>
         </ul>
       </div>
       <div class="rule-section">
-        <h3>② 參觀對象與人數</h3>
+        <h3>&#9313; 參觀對象與人數</h3>
         <ul class="rule-list">
           <li>以團體參觀為主，至少 5 人以上</li>
           <li>因展示室空間有限，請依實際人數填寫</li>
         </ul>
       </div>
       <div class="rule-section">
-        <h3>③ 預約方式</h3>
+        <h3>&#9314; 預約方式</h3>
         <ul class="rule-list">
-          <li>請於預定參觀日期 <strong>2 週前</strong>進行線上填寫「紡織所印象館」預約參訪申請單</li>
+          <li>請於預定參觀日期 <strong>7 天前</strong>進行線上填寫「紡織所印象館」預約參訪申請單</li>
         </ul>
       </div>
       <div class="rule-section">
-        <h3>④ 確認與取消</h3>
+        <h3>&#9315; 確認與取消</h3>
         <ul class="rule-list">
           <li>如於預定參觀日前 1 週還未收到電子郵件通知預約成功，請來電洽詢</li>
-          <li>若需取消預約，請於 <strong>2 日前</strong>主動來電告知，以免影響其他參觀團體權益</li>
+          <li>若需取消預約，請於參觀日 <strong>2 日前</strong>至「查詢預約」輸入預約編號自行線上取消；參觀日前 <strong>1 日內</strong>請來電告知，以免影響其他參觀團體權益</li>
           <li>違反上述規定之團體，將暫停其登記參觀申請權益 <strong>半年</strong></li>
         </ul>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title"><span class="icon">⚠️</span>參觀注意事項</div>
+      <div class="card-title"><span class="icon">&#9888;</span>參觀注意事項</div>
       <div class="rule-section">
         <ol class="rule-list">
           <li>如參觀日遇政府發布颱風警報、補假日或調整放假日均暫停辦理。</li>
           <li>請勿破壞展品或展場設備；展場內請勿喧嘩、奔跑或躺臥座椅。</li>
           <li>參觀請著整齊服裝、勿穿著不雅。（<strong>勿穿著拖鞋入館</strong>。）</li>
-          <li>請愛護館內的展示品，勿觸摸未開放觸摸之展示品。</li>
+          <li>請愛護館內的展示品，勿觸摸未開放觸畫之展示品。</li>
           <li>請勿破壞、移動展示品；如有損壞，應負賠償責任；如攜走展示品，為偷竊行為，將移送法辦。</li>
           <li>禁止攜帶危險物品、食物、飲料、長傘、寵物（導盲犬除外）；禁止飲食、吸菸、飲酒、嚼食口香糖與檳榔；並禁止隨地吐痰。</li>
           <li>館內<strong>禁止拍照、錄影、錄音</strong>，亦禁止使用自拍棒、閃光燈、腳架。</li>
@@ -547,23 +569,21 @@
         </ol>
       </div>
       <div class="highlight-box">
-        🚌 <strong>停車說明：</strong>不提供預約參觀訪客免費停車位。如為團體以遊覽車者，請於參觀日期前 3 天以電話告知遊覽車車號予本所承辦人 <strong>尚小姐</strong>。
+        &#128652; <strong>停車說明：</strong>不提供預約參觀訪客免費停車位。如為團體以遊覽車者，請於參觀日期前 3 天來電 <strong>02-22670321 分機 6007</strong> 告知遊覽車車號。
       </div>
       <div style="margin-top:12px;font-size:14px;color:var(--text-muted);">
-        📞 參觀相關問題請洽：<strong style="color:var(--primary);">02-22670321 分機 6003</strong>
+        &#128222; 參觀相關問題請洽：<strong style="color:var(--primary);">02-22670321 分機 6007</strong>
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="showPage('reserve')">我已了解，前往預約 →</button>
+      <button class="btn btn-primary" onclick="showPage('reserve')">我已了解，前往預約 &#8594;</button>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════ RESERVE ═══════════════════════════════════════ -->
   <div id="page-reserve" class="page">
     <div class="card">
-      <div class="card-title"><span class="icon">📝</span>線上參訪預約申請</div>
+      <div class="card-title"><span class="icon">&#128221;</span>線上參訪預約申請</div>
 
-      <!-- Step indicator -->
       <div class="steps" id="stepIndicator">
         <div class="step active" id="step-dot-1">
           <div class="step-circle">1</div>
@@ -586,14 +606,14 @@
         </div>
       </div>
 
-      <!-- Step 1: Rules ack -->
       <div class="form-step active" id="form-step-1">
-        <div class="alert alert-info">ℹ️ 請閱讀以下預約規定，確認後勾選同意，方可進行下一步。</div>
+        <div class="alert alert-info">&#8505; 請閱讀以下預約規定，確認後勾選同意，方可進行下一步。</div>
         <div class="privacy-box" style="max-height:320px;overflow-y:auto;">
-          <p><strong>一、開放時間：</strong>週一至週五，上午 09:30–12:00，下午 13:30–16:30（每次 2 小時上限）。</p>
+          <p><strong>參訪場區：</strong>紡織所土城場區、紡織所斗六場區，請於填寫資料時選擇。</p>
+          <p><strong>一、開放時間：</strong>週一至週五 09:30–12:00、13:30–16:30（12:00–13:00 午休不開放），參觀時間可於此範圍內自行選擇（每次 2 小時上限）。</p>
           <p><strong>二、參觀人數：</strong>以團體參觀為主，至少 5 人以上，請依實際人數填寫。</p>
-          <p><strong>三、預約時程：</strong>請於預定參觀日期 2 週前預約，且限申請日起 2 個月內之日期。</p>
-          <p><strong>四、取消規定：</strong>如需取消，請於 2 日前來電告知，否則將暫停申請權益半年。</p>
+          <p><strong>三、預約時程：</strong>請於預定參觀日期 7 天前預約，且限申請日起 2 個月內之日期。</p>
+          <p><strong>四、取消規定：</strong>如需取消，請於參觀日 2 日前至「查詢預約」自行線上取消；參觀日前 1 日內請來電告知。未依規定取消者，將暫停申請權益半年。</p>
           <p><strong>五、著裝規定：</strong>請著整齊服裝，勿穿著拖鞋入館。</p>
           <p><strong>六、禁止事項：</strong>館內禁止拍照、錄影、錄音、飲食、吸菸，禁止攜帶食物、飲料及寵物（導盲犬除外）。</p>
           <p><strong>七、安全規定：</strong>請勿破壞或移動展示品；如有損壞，應負賠償責任。</p>
@@ -604,18 +624,17 @@
           <label for="ack-rules">本人已詳細閱讀並充分理解以上預約規定，同意遵守所有事項。</label>
         </div>
         <div class="btn-row">
-          <button class="btn btn-primary" onclick="nextStep(1)">下一步：個資同意 →</button>
+          <button class="btn btn-primary" onclick="nextStep(1)">下一步：個資同意 &#8594;</button>
         </div>
       </div>
 
-      <!-- Step 2: Privacy -->
       <div class="form-step" id="form-step-2">
         <div class="privacy-box" style="max-height:300px;overflow-y:auto;">
           <p><strong>個人資料保護聲明</strong></p>
           <p>一、本人同意授權本所將您的個資交付內部其他單位，此個資包含：<strong>姓名、聯絡電話及 E-Mail</strong>。</p>
           <p>二、除本所之外，相關個資將不會交付給任何其他機構或第三人。</p>
           <p>三、您的個資僅作為本所紡織印象館預約服務使用，期限為 <strong>3 個月</strong>，期限過後則刪除不保留。</p>
-          <p>四、若對於本所留存之您的個資有查詢、修改、製作副本或刪除的需求，請來電 <strong>02-22670321 分機 6003</strong>。</p>
+          <p>四、若對於本所留存之您的個資有查詢、修改、製作副本或刪除的需求，請來電 <strong>02-22670321 分機 6007</strong>。</p>
           <p>五、若不同意上述注意事項，且不填寫必要的資料者，恕無法提供本項服務。</p>
         </div>
         <div class="checkbox-group" style="margin-top:16px;">
@@ -623,15 +642,28 @@
           <label for="ack-privacy">本人已詳細並確認充分理解本段注意事項之文字內容，並同意本所依上述說明蒐集、處理及利用本人之個人資料。</label>
         </div>
         <div class="btn-row">
-          <button class="btn btn-secondary" onclick="prevStep(2)">← 上一步</button>
-          <button class="btn btn-primary" onclick="nextStep(2)">下一步：填寫資料 →</button>
+          <button class="btn btn-secondary" onclick="prevStep(2)">&#8592; 上一步</button>
+          <button class="btn btn-primary" onclick="nextStep(2)">下一步：填寫資料 &#8594;</button>
         </div>
       </div>
 
-      <!-- Step 3: Form -->
       <div class="form-step" id="form-step-3">
         <form id="reserveForm" novalidate>
           <div class="form-grid">
+            <div class="form-group full">
+              <label>參訪場區<span class="req">*</span></label>
+              <div class="time-slots" id="siteChoices">
+                <button type="button" class="slot-btn" id="site-tucheng" onclick="selectSite('tucheng')">
+                  土城場區
+                  <span class="slot-time">新北市土城區</span>
+                </button>
+                <button type="button" class="slot-btn" id="site-douliu" onclick="selectSite('douliu')">
+                  斗六場區
+                  <span class="slot-time">雲林縣斗六市</span>
+                </button>
+              </div>
+              <div class="field-error" id="err-site"></div>
+            </div>
             <div class="form-group">
               <label>申請單位（機關/學校/公司）<span class="req">*</span></label>
               <input type="text" id="f-org" placeholder="請輸入申請單位名稱" required>
@@ -643,9 +675,18 @@
               <div class="field-error" id="err-name"></div>
             </div>
             <div class="form-group">
-              <label>聯絡電話<span class="req">*</span></label>
-              <input type="tel" id="f-tel" placeholder="例：02-12345678 或 0912-345-678" required>
+              <label>電話<span class="req">*</span></label>
+              <div class="tel-row">
+                <input type="tel" id="f-tel" placeholder="例：02-22670321">
+                <span>分機</span>
+                <input type="text" id="f-tel-ext" inputmode="numeric" maxlength="6" placeholder="選填">
+              </div>
               <div class="field-error" id="err-tel"></div>
+            </div>
+            <div class="form-group">
+              <label>手機<span class="req">*</span></label>
+              <input type="tel" id="f-mobile" placeholder="例：0912-345-678">
+              <div class="field-error" id="err-mobile"></div>
             </div>
             <div class="form-group">
               <label>電子郵件<span class="req">*</span></label>
@@ -655,7 +696,7 @@
             <div class="form-group">
               <label>預定參觀日期<span class="req">*</span></label>
               <input type="date" id="f-date">
-              <div class="hint" id="date-hint">僅開放工作日，預約日期須為今日起 14 天後至 60 天內</div>
+              <div class="hint" id="date-hint">僅開放工作日，預約日期須為今日起 7 天後至 60 天內</div>
               <div class="field-error" id="err-date"></div>
             </div>
             <div class="form-group">
@@ -663,23 +704,36 @@
               <input type="number" id="f-count" min="5" placeholder="請輸入人數（至少 5 人）" required>
               <div class="field-error" id="err-count"></div>
             </div>
+            <div class="form-group">
+              <label>交通方式<span class="req">*</span></label>
+              <select id="f-transport" onchange="onTransportChange()">
+                <option value="">請選擇交通方式</option>
+                <option value="遊覽車">遊覽車</option>
+                <option value="自行開車">自行開車</option>
+                <option value="大眾運輸">大眾運輸</option>
+              </select>
+              <div class="hint" id="car-hint-group" style="display:none;color:var(--warning);font-weight:700;">&#9888; 本所不提供停車位，請自行安排停車</div>
+              <div class="field-error" id="err-transport"></div>
+            </div>
+            <div class="form-group" id="bus-plate-group" style="display:none;">
+              <label>遊覽車車號</label>
+              <input type="text" id="f-bus-plate" placeholder="例：KAA-1234（尚未確定可留白）">
+              <div class="hint">若尚未確定，請於參觀日 3 天前來電告知車號</div>
+            </div>
             <div class="form-group full">
-              <label>參觀時段<span class="req">*</span></label>
-              <div class="time-slots" id="timeSlots">
-                <button type="button" class="slot-btn" id="slot-am" onclick="selectSlot('morning')">
-                  上午時段
-                  <span class="slot-time">09:30 – 12:00</span>
-                </button>
-                <button type="button" class="slot-btn" id="slot-pm" onclick="selectSlot('afternoon')">
-                  下午時段
-                  <span class="slot-time">13:30 – 16:30</span>
-                </button>
+              <label>參觀時間<span class="req">*</span></label>
+              <div class="time-range">
+                <select id="f-start" onchange="onTimeChange('start')"></select>
+                <span>至</span>
+                <select id="f-end" onchange="onTimeChange('end')"></select>
               </div>
+              <div class="hint">開放時間 09:30–12:00、13:30–16:30（12:00–13:00 午休），請自行選擇開始與結束時間（以 30 分鐘為單位，每次最多 2 小時，不可跨越午休）</div>
+              <div class="hint" id="booked-times"></div>
               <div class="field-error" id="err-slot"></div>
             </div>
             <div class="form-group full">
               <label>參觀目的<span class="req">*</span></label>
-              <select id="f-purpose" required>
+              <select id="f-purpose" required onchange="onPurposeChange()">
                 <option value="">請選擇參觀目的</option>
                 <option value="教育學習">教育學習（學校校外教學）</option>
                 <option value="業界參訪">業界參訪（廠商交流）</option>
@@ -687,6 +741,7 @@
                 <option value="學術研究">學術研究</option>
                 <option value="其他">其他</option>
               </select>
+              <input type="text" id="f-purpose-other" placeholder="請說明參觀目的" style="display:none;margin-top:8px;" maxlength="100">
               <div class="field-error" id="err-purpose"></div>
             </div>
             <div class="form-group full">
@@ -696,17 +751,16 @@
           </div>
         </form>
         <div class="btn-row">
-          <button class="btn btn-secondary" onclick="prevStep(3)">← 上一步</button>
+          <button class="btn btn-secondary" onclick="prevStep(3)">&#8592; 上一步</button>
           <button class="btn btn-accent" onclick="submitReservation()">送出預約申請</button>
         </div>
       </div>
 
-      <!-- Step 4: Confirmation -->
       <div class="form-step" id="form-step-4">
         <div class="confirm-box" id="confirmBox"></div>
         <div class="confirm-details" id="confirmDetails"></div>
         <div class="alert alert-warning" style="margin-top:16px;">
-          ⚠️ 請妥善保存您的預約編號。如於預定參觀日前 1 週還未收到 E-Mail 通知，請來電洽詢：<strong>02-22670321 分機 6003</strong>
+          &#9888; 請妥善保存您的預約編號。如於預定參觀日前 1 週還未收到 E-Mail 通知，請來電洽詢：<strong>02-22670321 分機 6007</strong>
         </div>
         <div class="btn-row">
           <button class="btn btn-secondary" onclick="window.print()">列印確認單</button>
@@ -716,14 +770,13 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════ QUERY ═══════════════════════════════════════ -->
   <div id="page-query" class="page">
     <div class="card">
-      <div class="card-title"><span class="icon">🔍</span>查詢預約</div>
+      <div class="card-title"><span class="icon">&#128269;</span>查詢預約</div>
       <div class="query-form">
         <div class="form-group" style="flex:1;">
           <label>預約編號</label>
-          <input type="text" id="q-ref" placeholder="請輸入預約編號，例：TTRI-20260309-001" style="letter-spacing:1px;">
+          <input type="text" id="q-ref" placeholder="請輸入預約編號，例：TC260309-01" style="letter-spacing:1px;">
         </div>
         <button class="btn btn-primary" onclick="queryByRef()" style="padding:11px 24px;margin-bottom:0;">查詢</button>
       </div>
@@ -731,11 +784,10 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════ ADMIN ═══════════════════════════════════════ -->
   <div id="page-admin" class="page">
     <div id="admin-login-area">
       <div class="admin-login">
-        <div style="font-size:40px;margin-bottom:12px;">🔐</div>
+        <div style="font-size:40px;margin-bottom:12px;">&#128272;</div>
         <h2>管理後台登入</h2>
         <div class="form-group" style="margin-bottom:12px;">
           <label>管理員帳號</label>
@@ -748,19 +800,17 @@
           <input type="password" id="admin-pw" placeholder="請輸入密碼" autocomplete="current-password"
             onkeydown="if(event.key==='Enter')adminLogin()">
         </div>
-        <button class="btn btn-primary" onclick="adminLogin()" style="width:100%;">登入</button>
+        <button class="btn btn-primary" id="btn-admin-login" onclick="adminLogin()" style="width:100%;">登入</button>
         <div id="admin-login-err" class="field-error" style="margin-top:10px;text-align:center;"></div>
-        <div>
-          <span class="forgot-link" onclick="openForgotModal()">忘記帳號或密碼？</span>
-        </div>
+        <div style="margin-top:14px;font-size:12px;color:var(--text-muted);text-align:center;">忘記密碼請洽系統管理員重設</div>
       </div>
     </div>
     <div id="admin-panel" style="display:none;">
-      <!-- Admin tab bar -->
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
         <div style="display:flex;gap:8px;">
-          <button class="btn btn-primary" id="tab-reservations" onclick="switchAdminTab('reservations')" style="font-size:13px;padding:8px 18px;">📊 預約管理</button>
-          <button class="btn btn-secondary" id="tab-accounts" onclick="switchAdminTab('accounts')" style="font-size:13px;padding:8px 18px;">👤 帳號管理</button>
+          <button class="btn btn-primary" id="tab-reservations" onclick="switchAdminTab('reservations')" style="font-size:13px;padding:8px 18px;">&#128202; 預約管理</button>
+          <button class="btn btn-secondary" id="tab-staff" onclick="switchAdminTab('staff')" style="font-size:13px;padding:8px 18px;">&#128101; 同仁名單</button>
+          <button class="btn btn-secondary" id="tab-accounts" onclick="switchAdminTab('accounts')" style="font-size:13px;padding:8px 18px;">&#128100; 帳號管理</button>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
           <span id="admin-current-user" style="font-size:13px;color:var(--text-muted);"></span>
@@ -768,12 +818,18 @@
         </div>
       </div>
 
-      <!-- Tab: Reservations -->
       <div id="admin-tab-reservations">
         <div class="admin-stats" id="adminStats"></div>
         <div class="card">
-          <div class="card-title"><span class="icon">📊</span>預約清單</div>
+          <div class="card-title"><span class="icon">&#128202;</span>預約清單</div>
           <div class="admin-toolbar">
+            <div class="admin-filter">
+              <select id="admin-filter-site" onchange="renderAdminStats();renderAdminTable()">
+                <option value="">全部場區</option>
+                <option value="tucheng">土城場區</option>
+                <option value="douliu">斗六場區</option>
+              </select>
+            </div>
             <div class="admin-filter">
               <select id="admin-filter-status" onchange="renderAdminTable()">
                 <option value="">全部狀態</option>
@@ -783,10 +839,10 @@
               </select>
             </div>
             <input type="text" id="admin-search" placeholder="搜尋單位/聯絡人..." oninput="renderAdminTable()" style="flex:1;max-width:240px;">
-            <button class="btn btn-secondary" onclick="loadAdminData()" title="重新從雲端讀取資料">🔄 重新整理</button>
-            <button class="btn btn-secondary" onclick="exportExcel()">📊 匯出 Excel</button>
+            <button class="btn btn-secondary" onclick="loadAdminData()" title="重新從雲端讀取資料">&#128250; 重新整理</button>
+            <button class="btn btn-secondary" onclick="exportExcel()">&#128202; 匯出 Excel</button>
             <button class="btn btn-secondary" onclick="exportCSV()">匯出 CSV</button>
-            <button class="btn btn-danger" id="btn-delete-selected" onclick="deleteSelected()" style="display:none;">🗑️ 刪除選取</button>
+            <button class="btn btn-danger" id="btn-delete-selected" onclick="deleteSelected()" style="display:none;">&#128465; 刪除選取</button>
             <button class="btn btn-danger" onclick="clearAll()" style="margin-left:auto;">清除所有資料</button>
           </div>
           <div style="overflow-x:auto;">
@@ -794,8 +850,8 @@
               <thead>
                 <tr>
                   <th style="width:36px;"><input type="checkbox" id="chk-all" onclick="toggleAllCheckbox(this)" title="全選"></th>
-                  <th>預約編號</th><th>申請單位</th><th>聯絡人</th><th>電話</th><th>Email</th>
-                  <th>參觀日期</th><th>時段</th><th>人數</th><th>狀態</th><th>審核 / 通知</th>
+                  <th>預約編號</th><th>場區</th><th>申請單位</th><th>聯絡人</th><th>電話／手機</th><th>Email</th>
+                  <th>參觀日期</th><th>時間</th><th>人數</th><th>狀態</th><th>審核 / 通知</th>
                 </tr>
               </thead>
               <tbody id="adminTableBody"></tbody>
@@ -804,19 +860,82 @@
         </div>
       </div>
 
-      <!-- Tab: Account Management -->
+      <div id="admin-tab-staff" style="display:none;">
+        <div class="card">
+          <div class="card-title"><span class="icon">&#128101;</span>紡織所同仁名單</div>
+          <div class="alert alert-info" style="margin-bottom:18px;">
+            &#8505; 在「預約管理」按「&#128101; 通知同仁」時，會列出這份名單讓您勾選要通知的人。勾選「新預約自動通知」的同仁，在該場區有新預約時也會自動收到通知信。同仁資料只存在後端，不會出現在公開網頁。
+          </div>
+          <div class="admin-toolbar">
+            <div class="admin-filter">
+              <select id="staff-filter-site" onchange="renderStaffTable()">
+                <option value="">全部場區</option>
+                <option value="tucheng">土城場區</option>
+                <option value="douliu">斗六場區</option>
+                <option value="both">兩場區</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="openStaffForm()" style="font-size:13px;">+ 新增同仁</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="admin-table">
+              <thead><tr><th>場區</th><th>姓名</th><th>單位／職稱</th><th>Email</th><th>分機／電話</th><th>新預約自動通知</th><th>操作</th></tr></thead>
+              <tbody id="staffTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" id="staff-form" style="display:none;">
+          <div class="card-title"><span class="icon">&#9998;</span><span id="staff-form-title">新增同仁</span></div>
+          <input type="hidden" id="sf-id">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>場區<span class="req">*</span></label>
+              <select id="sf-site">
+                <option value="tucheng">土城場區</option>
+                <option value="douliu">斗六場區</option>
+                <option value="both">兩場區</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>姓名<span class="req">*</span></label>
+              <input type="text" id="sf-name" placeholder="例：王小明">
+            </div>
+            <div class="form-group">
+              <label>單位／職稱</label>
+              <input type="text" id="sf-unit" placeholder="例：企劃處 / 導覽人員">
+            </div>
+            <div class="form-group">
+              <label>Email<span class="req">*</span></label>
+              <input type="email" id="sf-email" placeholder="name@ttri.org.tw">
+            </div>
+            <div class="form-group">
+              <label>分機／電話</label>
+              <input type="text" id="sf-phone" placeholder="例：6007">
+            </div>
+            <div class="form-group" style="justify-content:flex-end;">
+              <label class="chk-inline"><input type="checkbox" id="sf-auto"> 該場區有新預約時自動通知</label>
+            </div>
+          </div>
+          <div class="field-error" id="sf-err" style="margin-top:8px;"></div>
+          <div class="btn-row">
+            <button class="btn btn-secondary" onclick="closeStaffForm()">取消</button>
+            <button class="btn btn-primary" id="btn-save-staff" onclick="saveStaff()">儲存</button>
+          </div>
+        </div>
+      </div>
+
       <div id="admin-tab-accounts" style="display:none;">
         <div class="card">
-          <div class="card-title"><span class="icon">👤</span>管理員帳號</div>
+          <div class="card-title"><span class="icon">&#128100;</span>管理員帳號</div>
           <div class="admin-toolbar">
             <button class="btn btn-primary" onclick="showAddAccountForm()" style="font-size:13px;">+ 新增管理員</button>
           </div>
           <div id="account-list"></div>
         </div>
 
-        <!-- Add account form -->
         <div class="card" id="add-account-form" style="display:none;">
-          <div class="card-title"><span class="icon">➕</span>新增管理員帳號</div>
+          <div class="card-title"><span class="icon">&#10133;</span>新增管理員帳號</div>
           <div class="form-grid">
             <div class="form-group">
               <label>姓名</label>
@@ -842,16 +961,37 @@
             <button class="btn btn-primary" onclick="addAdminAccount()">新增帳號</button>
           </div>
         </div>
+
+        <div class="card">
+          <div class="card-title"><span class="icon">&#128273;</span>變更我的密碼</div>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label>目前密碼</label>
+              <input type="password" id="my-old-pass" autocomplete="current-password">
+            </div>
+            <div class="form-group">
+              <label>新密碼</label>
+              <input type="password" id="my-new-pass" placeholder="至少8碼，含大小寫英文及數字" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+              <label>確認新密碼</label>
+              <input type="password" id="my-new-pass2" autocomplete="new-password">
+            </div>
+          </div>
+          <div class="field-error" id="change-pass-err" style="margin-top:8px;"></div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="changeMyPassword()">變更密碼</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
 </main>
 
-<!-- ── 取消原因 Modal ── -->
 <div class="modal-overlay" id="cancelModal">
   <div class="modal-box">
-    <h3>❌ 取消預約</h3>
+    <h3>&#10060; 取消預約</h3>
     <p>請填寫取消原因（將自動帶入通知信）</p>
     <textarea id="cancelReasonInput" placeholder="例如：場地維護、活動衝突、申請單位主動取消…"></textarea>
     <div id="cancelReasonErr" style="color:#c0392b;font-size:12px;margin-top:4px;"></div>
@@ -862,89 +1002,109 @@
   </div>
 </div>
 
-<!-- ── 忘記密碼 Modal ── -->
-<div class="modal-overlay" id="forgotModal">
+<div class="modal-overlay" id="visitorCancelModal">
   <div class="modal-box">
-    <div style="font-size:36px;margin-bottom:8px;">🔑</div>
-    <h3>重設管理員密碼</h3>
-    <div class="modal-steps">
-      <!-- Step 1: 輸入重設碼 -->
-      <div class="step active" id="forgot-step1">
-        <p class="modal-desc">請輸入主管重設碼以驗證身份</p>
-        <div class="form-group" style="text-align:left;margin-bottom:12px;">
-          <label>主管重設碼</label>
-          <input type="password" id="forgot-reset-code" placeholder="請輸入重設碼"
-            onkeydown="if(event.key==='Enter')forgotVerifyCode()">
-        </div>
-        <div id="forgot-step1-err" class="field-error" style="margin-bottom:10px;"></div>
-        <div style="display:flex;gap:10px;">
-          <button class="btn btn-secondary" onclick="closeForgotModal()" style="flex:1;">取消</button>
-          <button class="btn btn-primary" onclick="forgotVerifyCode()" style="flex:1;">驗證</button>
-        </div>
-        <p style="font-size:11px;color:var(--text-muted);margin-top:14px;">預設重設碼：<b>TTRI@Reset</b><br>如已更改請聯繫系統管理員</p>
-      </div>
-      <!-- Step 2: 選擇帳號並設定新密碼 -->
-      <div class="step" id="forgot-step2">
-        <p class="modal-desc">選擇要重設的帳號，並設定新密碼</p>
-        <div class="form-group" style="text-align:left;margin-bottom:12px;">
-          <label>選擇帳號</label>
-          <select id="forgot-account-select" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;"></select>
-        </div>
-        <div class="form-group" style="text-align:left;margin-bottom:12px;">
-          <label>新密碼</label>
-          <input type="password" id="forgot-new-pw" placeholder="至少8碼，含大小寫英文及數字">
-        </div>
-        <div class="form-group" style="text-align:left;margin-bottom:12px;">
-          <label>確認新密碼</label>
-          <input type="password" id="forgot-new-pw2" placeholder="再次輸入新密碼"
-            onkeydown="if(event.key==='Enter')forgotResetPassword()">
-        </div>
-        <div id="forgot-step2-err" class="field-error" style="margin-bottom:10px;"></div>
-        <div style="display:flex;gap:10px;">
-          <button class="btn btn-secondary" onclick="closeForgotModal()" style="flex:1;">取消</button>
-          <button class="btn btn-primary" onclick="forgotResetPassword()" style="flex:1;">重設密碼</button>
-        </div>
-      </div>
-      <!-- Step 3: 成功 -->
-      <div class="step" id="forgot-step3">
-        <div style="font-size:48px;margin-bottom:12px;">✅</div>
-        <p class="modal-desc" style="font-size:15px;color:var(--success);">密碼已成功重設！<br>請使用新密碼重新登入。</p>
-        <button class="btn btn-primary" onclick="closeForgotModal()" style="width:100%;margin-top:8px;">關閉</button>
-      </div>
+    <h3>&#10060; 取消預約</h3>
+    <p id="vc-summary"></p>
+    <div class="form-group">
+      <label>申請時填寫的手機或 E-Mail<span class="req">*</span></label>
+      <input type="text" id="vc-contact" placeholder="例：0912-345-678 或 example@domain.com" autocomplete="off">
+    </div>
+    <div class="form-group" style="margin-top:12px;">
+      <label>取消原因（選填）</label>
+      <textarea id="vc-reason" placeholder="例：行程異動" style="min-height:60px;"></textarea>
+    </div>
+    <div id="vc-err" class="field-error" style="margin-top:6px;"></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="document.getElementById('visitorCancelModal').classList.remove('open')">返回</button>
+      <button class="btn btn-danger" id="vc-submit" onclick="submitVisitorCancel()">確定取消預約</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="staffNotifyModal">
+  <div class="modal-box wide">
+    <h3>&#128101; 通知紡織所同仁</h3>
+    <p>勾選要通知的同仁，系統會從預約系統信箱寄出包含預約資料（含申請單位聯絡方式）的通知信。</p>
+    <div class="res-summary" id="sn-summary"></div>
+    <div id="sn-list"></div>
+    <div class="form-group" style="margin-top:14px;">
+      <label>附加說明（選填）</label>
+      <textarea id="sn-message" placeholder="例：請協助當天導覽，並預留會議室。" style="min-height:70px;"></textarea>
+    </div>
+    <div id="sn-err" class="field-error" style="margin-top:6px;"></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="document.getElementById('staffNotifyModal').classList.remove('open')">返回</button>
+      <button class="btn btn-primary" id="sn-send" onclick="sendStaffNotify()">寄出通知</button>
     </div>
   </div>
 </div>
 
 <footer>
   <strong>財團法人紡織產業綜合研究所 · 紡織印象館</strong><br>
-  聯絡電話：02-22670321 分機 6003　傳真：02-2268-9834　E-Mail：<a href="mailto:mhsheng.0805@ttri.org.tw" style="color:rgba(255,255,255,0.8);">mhsheng.0805@ttri.org.tw</a><br>
-  承辦人：尚小姐
-  <br><span id="adminAccessTrigger" style="opacity:0;user-select:none;cursor:default;font-size:10px;" title="">&copy;</span>
+  聯絡電話：02-22670321 分機 6007　傳真：02-2268-9834　E-Mail：<a href="mailto:service@ttri.org.tw" style="color:rgba(255,255,255,0.8);">service@ttri.org.tw</a><br>
+  <button type="button" class="footer-admin" onclick="showPage('admin')">後台管理</button>
+  <span id="adminAccessTrigger" style="opacity:0;user-select:none;cursor:default;font-size:10px;" title="">&copy;</span>
 </footer>
 
 <script>
-// ── Helpers ──────────────────────────────────────────────────────────────────
-const LS_KEY = 'ttri_reservations';
-// ★ Google Apps Script 網址
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxobC4zORg8CHNUA0-YOQkOBXk3VGJJv5XCaWvwVxVWXsd7O1hJ_UqcsKgzhSvHZdCV/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5zxBOfyNfny5lfmae1M_gYpuOCnD8b-6i9Y1oPFqvd157ZcGK-B9fvcPU0r_CHXNY/exec';
 
-let adminCache = []; // 後台資料快取
+// ── 場區 ──────────────────────────────────────────────────────────────────────
+// 舊資料沒有 site 欄位，一律視為土城場區
+const SITES = {
+  tucheng: { label: '土城場區', full: '紡織所土城場區', code: 'TC' },
+  douliu:  { label: '斗六場區', full: '紡織所斗六場區', code: 'DL' }
+};
+function siteOf(r) { return (r && SITES[r.site]) ? r.site : 'tucheng'; }
+function siteFull(r) { return SITES[siteOf(r)].full; }
+function siteTag(r) { const s = siteOf(r); return `<span class="site-tag site-${s}">${SITES[s].label}</span>`; }
 
-function getReservations() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch { return []; }
+function esc(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 }
-function saveReservations(arr) {
-  localStorage.setItem(LS_KEY, JSON.stringify(arr));
-}
-function genRef(date) {
-  const d = date.replace(/-/g, '');
-  const all = getReservations();
-  const same = all.filter(r => r.date === date).length;
-  const seq = String(same + 1).padStart(3, '0');
-  return `TTRI-${d}-${seq}`;
+function dateOnly(v) { const s = String(v || ''); return s.length > 10 ? s.substring(0, 10) : s; }
+
+// ── 後端呼叫 ──────────────────────────────────────────────────────────────────
+async function postApi(payload) {
+  const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
+  return res.json();
 }
 
-// ── Navigation ────────────────────────────────────────────────────────────────
+// 已占用的時段（只含日期／場區／時段，不含個資）；失敗時回傳 null
+async function fetchAvailability() {
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=availability');
+    const data = await res.json();
+    return data.success ? data.slots : null;
+  } catch(e) { return null; }
+}
+
+// ── 參觀時間（09:30–12:00、13:30–16:30，30 分鐘為單位）─────────────────────────
+const OPEN_START = '09:30', OPEN_END = '16:30', TIME_STEP = 30, LEAD_DAYS = 7, MAX_MINUTES = 120;
+// 午休 12:00–13:00，下午 13:30 起開放；12:00–13:30 不開放預約
+const BREAK_START = '12:00', BREAK_END = '13:30';
+function crossesBreak(start, end) { return toMin(start) < toMin(BREAK_END) && toMin(BREAK_START) < toMin(end); }
+// 舊資料只有上午／下午時段，換算成時間區間
+const LEGACY_SLOTS = { morning: ['09:30', '12:00'], afternoon: ['13:30', '16:30'] };
+
+function toMin(t) { const [h, m] = String(t).split(':').map(Number); return h * 60 + m; }
+function fromMin(n) { return String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0'); }
+function timeRange(r) {
+  if (r.startTime && r.endTime) return [String(r.startTime), String(r.endTime)];
+  return LEGACY_SLOTS[r.slot] || null;
+}
+function timeLabel(r) { const t = timeRange(r); return t ? `${t[0]}–${t[1]}` : (r.slotLabel || ''); }
+
+// 同日期、同場區、時間有重疊且未取消的預約
+function overlapping(records, date, site, start, end) {
+  return records.filter(r => {
+    if (dateOnly(r.date) !== date || siteOf(r) !== site || r.status === 'cancelled') return false;
+    const t = timeRange(r);
+    return t && toMin(start) < toMin(t[1]) && toMin(t[0]) < toMin(end);
+  });
+}
+
 const pages = ['home','rules','reserve','query','admin'];
 function showPage(id) {
   pages.forEach(p => {
@@ -954,21 +1114,20 @@ function showPage(id) {
   document.querySelectorAll('.nav-btn').forEach((b, i) => {
     b.classList.toggle('active', pages[i] === id);
   });
-  if (id === 'query') renderRecentReservations();
-  if (id === 'admin' && document.getElementById('admin-panel').style.display !== 'none') {
-    loadAdminData();
+  if (id === 'admin' && adminSession) {
+    if (document.getElementById('admin-panel').style.display === 'none') enterAdminPanel();
+    else loadAdminData();
   }
   window.scrollTo(0, 0);
 }
 
-// ── Steps ─────────────────────────────────────────────────────────────────────
 let currentStep = 1;
 function updateStepUI(step) {
   for (let i = 1; i <= 4; i++) {
     const dot = document.getElementById('step-dot-' + i);
     const circle = dot.querySelector('.step-circle');
     dot.classList.remove('active', 'done');
-    if (i < step) { dot.classList.add('done'); circle.textContent = '✓'; }
+    if (i < step) { dot.classList.add('done'); circle.innerHTML = '&#10003;'; }
     else if (i === step) { dot.classList.add('active'); circle.textContent = i; }
     else { circle.textContent = i; }
     if (i < 4) {
@@ -1000,24 +1159,50 @@ function prevStep(from) {
   updateStepUI(currentStep);
 }
 
-// ── Date Picker ───────────────────────────────────────────────────────────────
 function initDatePicker() {
   const input = document.getElementById('f-date');
   const today = new Date();
-  const minDate = new Date(today); minDate.setDate(today.getDate() + 14);
+  const minDate = new Date(today); minDate.setDate(today.getDate() + LEAD_DAYS);
   const maxDate = new Date(today); maxDate.setDate(today.getDate() + 60);
   input.min = toISO(minDate);
   input.max = toISO(maxDate);
-  input.addEventListener('change', onDateChange);
+  input.onchange = onDateChange;
+  initTimeSelects();
 }
 function toISO(d) {
   return d.toISOString().split('T')[0];
 }
+
+function initTimeSelects() {
+  const startSel = document.getElementById('f-start'), endSel = document.getElementById('f-end');
+  if (startSel.options.length) return;
+  // 上午、下午分組列出；午休時段不列入
+  const group = (label, from, to) => {
+    let html = `<optgroup label="${label}">`;
+    for (let m = toMin(from); m <= toMin(to); m += TIME_STEP) html += `<option value="${fromMin(m)}">${fromMin(m)}</option>`;
+    return html + '</optgroup>';
+  };
+  const step = n => fromMin(n);
+  startSel.innerHTML = '<option value="">請選擇</option>' +
+    group('上午', OPEN_START, step(toMin(BREAK_START) - TIME_STEP)) +
+    group('下午', BREAK_END, step(toMin(OPEN_END) - TIME_STEP));
+  endSel.innerHTML = '<option value="">請選擇</option>' +
+    group('上午', step(toMin(OPEN_START) + TIME_STEP), BREAK_START) +
+    group('下午', step(toMin(BREAK_END) + TIME_STEP), OPEN_END);
+}
+
+// 已預約資料（快取 60 秒，避免每次選擇都打 API）
+let slotRecords = null, slotRecordsAt = 0;
+async function getSlotRecords() {
+  if (slotRecords && Date.now() - slotRecordsAt < 60000) return slotRecords;
+  slotRecords = (await fetchAvailability()) || [];
+  slotRecordsAt = Date.now();
+  return slotRecords;
+}
+
 function onDateChange() {
   const d = new Date(document.getElementById('f-date').value + 'T00:00:00');
   const day = d.getDay();
-  document.getElementById('slot-am').classList.remove('full');
-  document.getElementById('slot-pm').classList.remove('full');
   if (day === 0 || day === 6) {
     document.getElementById('err-date').textContent = '此日期為假日，請選擇週一至週五的工作日。';
     document.getElementById('f-date').classList.add('error');
@@ -1025,35 +1210,86 @@ function onDateChange() {
   }
   document.getElementById('err-date').textContent = '';
   document.getElementById('f-date').classList.remove('error');
-  // Check slot availability
+  refreshSlots();
+}
+
+// 顯示該日該場區已被預約的時間，並檢查目前選的時間是否衝突
+async function refreshSlots() {
+  const info = document.getElementById('booked-times');
+  info.textContent = '';
   const dateStr = document.getElementById('f-date').value;
-  const reservations = getReservations().filter(r => r.date === dateStr && r.status !== 'cancelled');
-  const amTaken = reservations.some(r => r.slot === 'morning');
-  const pmTaken = reservations.some(r => r.slot === 'afternoon');
-  if (amTaken) {
-    document.getElementById('slot-am').classList.add('full');
-    document.getElementById('slot-am').title = '此時段已額滿';
-    if (selectedSlot === 'morning') { selectedSlot = ''; document.getElementById('slot-am').classList.remove('selected'); }
-  }
-  if (pmTaken) {
-    document.getElementById('slot-pm').classList.add('full');
-    document.getElementById('slot-pm').title = '此時段已額滿';
-    if (selectedSlot === 'afternoon') { selectedSlot = ''; document.getElementById('slot-pm').classList.remove('selected'); }
-  }
+  if (!dateStr || !selectedSite) return;
+  const records = await getSlotRecords();
+  const booked = overlapping(records, dateStr, selectedSite, OPEN_START, OPEN_END)
+    .map(timeRange).sort((a, b) => toMin(a[0]) - toMin(b[0]));
+  if (booked.length) info.textContent = `⚠ 當日${SITES[selectedSite].label}已預約時間：${booked.map(t => t[0] + '–' + t[1]).join('、')}，請避開`;
+  checkTime(records);
 }
 
-// ── Slot selection ────────────────────────────────────────────────────────────
-let selectedSlot = '';
-function selectSlot(slot) {
-  const btn = document.getElementById(slot === 'morning' ? 'slot-am' : 'slot-pm');
-  if (btn.classList.contains('full')) return;
-  selectedSlot = slot;
-  document.getElementById('slot-am').classList.toggle('selected', slot === 'morning');
-  document.getElementById('slot-pm').classList.toggle('selected', slot === 'afternoon');
-  document.getElementById('err-slot').textContent = '';
+// 回傳錯誤訊息，沒問題回傳空字串
+function timeError(records) {
+  const start = document.getElementById('f-start').value, end = document.getElementById('f-end').value;
+  if (!start || !end) return '請選擇參觀開始與結束時間';
+  if (toMin(start) < toMin(OPEN_START) || toMin(end) > toMin(OPEN_END)) return `參觀時間須在 ${OPEN_START}–${OPEN_END} 之間`;
+  if (toMin(end) <= toMin(start)) return '結束時間須晚於開始時間';
+  if (crossesBreak(start, end)) return `上午開放至 ${BREAK_START}，下午 ${BREAK_END} 起開放（12:00–13:00 午休），參觀時間不可跨越中午，請選擇上午或下午時段`;
+  if (toMin(end) - toMin(start) > MAX_MINUTES) return `每次參觀以 ${MAX_MINUTES / 60} 小時為上限，請縮短參觀時間`;
+  const dateStr = document.getElementById('f-date').value;
+  if (records && dateStr && selectedSite) {
+    const clash = overlapping(records, dateStr, selectedSite, start, end);
+    if (clash.length) return `此時間與已預約的 ${clash.map(timeLabel).join('、')} 重疊，請重新選擇`;
+  }
+  return '';
+}
+function checkTime(records) {
+  const start = document.getElementById('f-start').value, end = document.getElementById('f-end').value;
+  const msg = (start && end) ? timeError(records) : '';
+  document.getElementById('err-slot').textContent = msg;
+  return !msg;
+}
+async function onTimeChange(changed) {
+  const start = document.getElementById('f-start').value, endSel = document.getElementById('f-end');
+  // 選了開始時間後，預設結束時間為 2 小時後（上午不超過午休、下午不超過閉館）
+  if (changed === 'start' && start && (!endSel.value || toMin(endSel.value) <= toMin(start) ||
+      toMin(endSel.value) - toMin(start) > MAX_MINUTES || crossesBreak(start, endSel.value))) {
+    const limit = toMin(start) < toMin(BREAK_START) ? toMin(BREAK_START) : toMin(OPEN_END);
+    endSel.value = fromMin(Math.min(toMin(start) + MAX_MINUTES, limit));
+  }
+  checkTime(await getSlotRecords());
 }
 
-// ── Validation ────────────────────────────────────────────────────────────────
+function onPurposeChange() {
+  const other = document.getElementById('f-purpose').value === '其他';
+  const input = document.getElementById('f-purpose-other');
+  input.style.display = other ? '' : 'none';
+  if (other) input.focus();
+}
+// 選「其他」時存成「其他：說明」
+function purposeValue() {
+  const v = document.getElementById('f-purpose').value;
+  return v === '其他' ? `其他：${document.getElementById('f-purpose-other').value.trim()}` : v;
+}
+
+function onTransportChange() {
+  const v = document.getElementById('f-transport').value;
+  document.getElementById('bus-plate-group').style.display = v === '遊覽車' ? '' : 'none';
+  document.getElementById('car-hint-group').style.display = v === '自行開車' ? '' : 'none';
+}
+function transportLabel(r) {
+  if (!r.transport) return '';
+  if (r.transport === '遊覽車') return `遊覽車（車號：${r.busPlate || '未提供'}）`;
+  if (r.transport === '自行開車') return '自行開車（本所不提供停車位）';
+  return r.transport;
+}
+
+let selectedSite = '';
+function selectSite(site) {
+  selectedSite = site;
+  Object.keys(SITES).forEach(s => document.getElementById('site-' + s).classList.toggle('selected', s === site));
+  document.getElementById('err-site').textContent = '';
+  refreshSlots();
+}
+
 function validateField(id, errId, rule, msg) {
   const val = document.getElementById(id).value.trim();
   if (!rule(val)) {
@@ -1065,15 +1301,43 @@ function validateField(id, errId, rule, msg) {
   document.getElementById(id).classList.remove('error');
   return true;
 }
+// 電話、手機皆為必填；分機選填
+function validatePhones() {
+  const $ = id => document.getElementById(id);
+  const tel = $('f-tel').value.trim(), ext = $('f-tel-ext').value.trim(), mobile = $('f-mobile').value.trim();
+  let telErr = '', mobileErr = '';
+  if (!tel) telErr = '請輸入電話';
+  else if (!(/^[\d\-\(\)\s+]+$/.test(tel) && tel.replace(/\D/g, '').length >= 8)) telErr = '請輸入有效的電話號碼';
+  else if (ext && !/^\d{1,6}$/.test(ext)) telErr = '分機只能填數字';
+  if (!mobile) mobileErr = '請輸入手機';
+  else if (!/^09\d{8}$/.test(mobile.replace(/[\s\-]/g, ''))) mobileErr = '請輸入有效的手機號碼（09 開頭共 10 碼）';
+  $('err-tel').textContent = telErr;
+  $('err-mobile').textContent = mobileErr;
+  $('f-tel').classList.toggle('error', !!telErr);
+  $('f-mobile').classList.toggle('error', !!mobileErr);
+  return !telErr && !mobileErr;
+}
+// 電話＋分機，例：02-22670321 #6007
+function telLabel(r) {
+  return r.tel ? (r.telExt ? `${r.tel} #${r.telExt}` : String(r.tel)) : '';
+}
+
 function validateForm() {
   let ok = true;
+  if (!selectedSite) {
+    document.getElementById('err-site').textContent = '請選擇參訪場區';
+    ok = false;
+  }
   ok &= validateField('f-org', 'err-org', v => v.length >= 2, '請輸入申請單位名稱（至少 2 字）');
   ok &= validateField('f-name', 'err-name', v => v.length >= 2, '請輸入聯絡人姓名');
-  ok &= validateField('f-tel', 'err-tel', v => /^[\d\-\(\)\s+]+$/.test(v) && v.replace(/\D/g,'').length >= 8, '請輸入有效的聯絡電話');
+  ok &= validatePhones();
   ok &= validateField('f-email', 'err-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), '請輸入有效的電子郵件地址');
   ok &= validateField('f-count', 'err-count', v => { const n = parseInt(v); return n >= 5; }, '參觀人數至少需要 5 人');
   ok &= validateField('f-purpose', 'err-purpose', v => v !== '', '請選擇參觀目的');
-  // Date
+  if (document.getElementById('f-purpose').value === '其他') {
+    ok &= validateField('f-purpose-other', 'err-purpose', v => v.length >= 2, '選擇「其他」時，請說明參觀目的');
+  }
+  ok &= validateField('f-transport', 'err-transport', v => v !== '', '請選擇交通方式');
   const dateVal = document.getElementById('f-date').value;
   if (!dateVal) {
     document.getElementById('err-date').textContent = '請選擇預定參觀日期';
@@ -1082,13 +1346,13 @@ function validateForm() {
   } else {
     const d = new Date(dateVal + 'T00:00:00');
     const today = new Date(); today.setHours(0,0,0,0);
-    const minAllowed = new Date(today); minAllowed.setDate(today.getDate() + 14);
+    const minAllowed = new Date(today); minAllowed.setDate(today.getDate() + LEAD_DAYS);
     if (d.getDay() === 0 || d.getDay() === 6) {
       document.getElementById('err-date').textContent = '此日期為假日，請選擇工作日';
       document.getElementById('f-date').classList.add('error');
       ok = false;
     } else if (d < minAllowed) {
-      document.getElementById('err-date').textContent = '預約日期須於申請日 2 週（14天）後，請重新選擇';
+      document.getElementById('err-date').textContent = `預約日期須於申請日 ${LEAD_DAYS} 天後，請重新選擇`;
       document.getElementById('f-date').classList.add('error');
       ok = false;
     } else {
@@ -1096,117 +1360,95 @@ function validateForm() {
       document.getElementById('f-date').classList.remove('error');
     }
   }
-  // Slot
-  if (!selectedSlot) {
-    document.getElementById('err-slot').textContent = '請選擇參觀時段';
-    ok = false;
-  }
+  const tErr = timeError(slotRecords);
+  document.getElementById('err-slot').textContent = tErr;
+  if (tErr) ok = false;
   return !!ok;
 }
 
-// ── Submit ────────────────────────────────────────────────────────────────────
+function slotTakenAlert(dateVal, start, end) {
+  alert(`抱歉，${SITES[selectedSite].full} ${dateVal} ${start}–${end} 與其他單位的預約時間重疊，
+請重新選擇日期或時間。`);
+  slotRecords = null;
+  refreshSlots();
+}
+
 async function submitReservation() {
   if (!validateForm()) return;
-  const dateVal = document.getElementById('f-date').value;
-
-  // ── 提交前從 Apps Script 即時確認時段未被搶佔 ──────────────────────────
-  const slotLabel = selectedSlot === 'morning' ? '上午（09:30–12:00）' : '下午（13:30–16:30）';
-  if (SCRIPT_URL) {
-    try {
-      const res = await fetch(SCRIPT_URL + '?action=list');
-      const data = await res.json();
-      if (data.success) {
-        const taken = data.records.some(r =>
-          String(r.date).substring(0,10) === dateVal &&
-          r.slot === selectedSlot &&
-          r.status !== 'cancelled'
-        );
-        if (taken) {
-          alert(`抱歉，${dateVal} ${slotLabel} 時段已有其他單位完成預約，\n請重新選擇日期或時段。`);
-          onDateChange(); selectedSlot = '';
-          document.getElementById('slot-am').classList.remove('selected');
-          document.getElementById('slot-pm').classList.remove('selected');
-          document.getElementById('err-slot').textContent = '此時段已被預約，請重新選擇';
-          return;
-        }
-      }
-    } catch(e) {
-      // Apps Script 無法連線時改用 localStorage 備用檢查
-      const existing = getReservations().filter(r => r.date === dateVal && r.status !== 'cancelled');
-      if (existing.some(r => r.slot === selectedSlot)) {
-        alert(`抱歉，${dateVal} ${slotLabel} 時段已被預約，\n請重新選擇日期或時段。`);
-        onDateChange(); selectedSlot = '';
-        document.getElementById('slot-am').classList.remove('selected');
-        document.getElementById('slot-pm').classList.remove('selected');
-        document.getElementById('err-slot').textContent = '此時段已被預約，請重新選擇';
-        return;
-      }
-    }
-  } else {
-    // 無 Apps Script 時用 localStorage
-    const existing = getReservations().filter(r => r.date === dateVal && r.status !== 'cancelled');
-    if (existing.some(r => r.slot === selectedSlot)) {
-      alert(`抱歉，${dateVal} ${slotLabel} 時段已被預約，\n請重新選擇。`);
-      onDateChange(); selectedSlot = '';
-      document.getElementById('slot-am').classList.remove('selected');
-      document.getElementById('slot-pm').classList.remove('selected');
-      document.getElementById('err-slot').textContent = '此時段已被預約，請重新選擇';
+  const btn = document.querySelector('#form-step-3 .btn-accent');
+  btn.disabled = true; btn.textContent = '送出中…';
+  try {
+    const dateVal = document.getElementById('f-date').value;
+    const startTime = document.getElementById('f-start').value, endTime = document.getElementById('f-end').value;
+    const taken = await fetchAvailability();
+    if (taken && overlapping(taken, dateVal, selectedSite, startTime, endTime).length) { slotTakenAlert(dateVal, startTime, endTime); return; }
+    const rec = {
+      site: selectedSite,
+      siteLabel: SITES[selectedSite].full,
+      org: document.getElementById('f-org').value.trim(),
+      name: document.getElementById('f-name').value.trim(),
+      tel: document.getElementById('f-tel').value.trim(),
+      telExt: document.getElementById('f-tel-ext').value.trim(),
+      mobile: document.getElementById('f-mobile').value.trim(),
+      email: document.getElementById('f-email').value.trim(),
+      date: dateVal,
+      slot: 'custom',
+      startTime,
+      endTime,
+      slotLabel: `${startTime}–${endTime}`,
+      count: document.getElementById('f-count').value,
+      purpose: purposeValue(),
+      transport: document.getElementById('f-transport').value,
+      busPlate: document.getElementById('f-transport').value === '遊覽車' ? document.getElementById('f-bus-plate').value.trim() : '',
+      guide: '',
+      notes: document.getElementById('f-notes').value.trim(),
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    // 後端會再檢查一次時段、產生預約編號，並寄信給該場區的通知名單
+    let data = null;
+    try { data = await postApi({ action:'add', record: rec }); } catch(e) { console.warn('Apps Script 寫入失敗', e); }
+    if (data && data.error === 'slot_taken') { slotTakenAlert(dateVal, startTime, endTime); return; }
+    if (!data || !data.success) {
+      alert('預約送出失敗，請稍後再試，或來電 02-22670321 分機 6007 洽詢。');
       return;
     }
+    rec.ref = data.ref;
+    slotRecords = null;
+    showConfirmation(rec);
+    document.getElementById('form-step-3').classList.remove('active');
+    document.getElementById('form-step-4').classList.add('active');
+    currentStep = 4;
+    updateStepUI(4);
+  } finally {
+    btn.disabled = false; btn.textContent = '送出預約申請';
   }
-  const refNo = genRef(dateVal);
-  const rec = {
-    ref: refNo,
-    org: document.getElementById('f-org').value.trim(),
-    name: document.getElementById('f-name').value.trim(),
-    tel: document.getElementById('f-tel').value.trim(),
-    email: document.getElementById('f-email').value.trim(),
-    date: dateVal,
-    slot: selectedSlot,
-    slotLabel: selectedSlot === 'morning' ? '上午 09:30–12:00' : '下午 13:30–16:30',
-    count: document.getElementById('f-count').value,
-    purpose: document.getElementById('f-purpose').value,
-    guide: '',
-    notes: document.getElementById('f-notes').value.trim(),
-    status: 'pending',
-    createdAt: new Date().toISOString()
-  };
-  const arr = getReservations();
-  arr.push(rec);
-  saveReservations(arr);
-  // 同步寫入 Google Sheets
-  if (SCRIPT_URL) {
-    fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'add', record: rec }) })
-      .catch(e => console.warn('Apps Script 寫入失敗', e));
-  }
-  showConfirmation(rec);
-  document.getElementById('form-step-3').classList.remove('active');
-  document.getElementById('form-step-4').classList.add('active');
-  currentStep = 4;
-  updateStepUI(4);
 }
 
 function showConfirmation(rec) {
   const dateDisplay = rec.date.replace(/-/g, '/');
   document.getElementById('confirmBox').innerHTML = `
-    <div class="icon">✅</div>
+    <div class="icon">&#9989;</div>
     <h2>預約申請已送出！</h2>
     <p class="ref">您的預約編號</p>
-    <div class="ref-no">${rec.ref}</div>
+    <div class="ref-no">${esc(rec.ref)}</div>
     <p class="ref" style="color:var(--text-muted);">請保存此編號以便查詢或取消預約</p>
   `;
   document.getElementById('confirmDetails').innerHTML = `
     <table>
-      <tr><td>預約編號</td><td><strong>${rec.ref}</strong></td></tr>
-      <tr><td>申請單位</td><td>${rec.org}</td></tr>
-      <tr><td>聯絡人</td><td>${rec.name}</td></tr>
-      <tr><td>聯絡電話</td><td>${rec.tel}</td></tr>
-      <tr><td>電子郵件</td><td>${rec.email}</td></tr>
+      <tr><td>預約編號</td><td><strong>${esc(rec.ref)}</strong></td></tr>
+      <tr><td>參訪場區</td><td><strong>${esc(siteFull(rec))}</strong></td></tr>
+      <tr><td>申請單位</td><td>${esc(rec.org)}</td></tr>
+      <tr><td>聯絡人</td><td>${esc(rec.name)}</td></tr>
+      ${rec.tel ? `<tr><td>電話</td><td>${esc(telLabel(rec))}</td></tr>` : ''}
+      ${rec.mobile ? `<tr><td>手機</td><td>${esc(rec.mobile)}</td></tr>` : ''}
+      <tr><td>電子郵件</td><td>${esc(rec.email)}</td></tr>
       <tr><td>參觀日期</td><td>${dateDisplay}</td></tr>
-      <tr><td>參觀時段</td><td>${rec.slotLabel}</td></tr>
-      <tr><td>參觀人數</td><td>${rec.count} 人</td></tr>
-      <tr><td>參觀目的</td><td>${rec.purpose}</td></tr>
-      ${rec.notes ? `<tr><td>備註</td><td>${rec.notes}</td></tr>` : ''}
+      <tr><td>參觀時間</td><td>${esc(timeLabel(rec))}</td></tr>
+      <tr><td>參觀人數</td><td>${esc(rec.count)} 人</td></tr>
+      <tr><td>參觀目的</td><td>${esc(rec.purpose)}</td></tr>
+      <tr><td>交通方式</td><td>${esc(transportLabel(rec))}</td></tr>
+      ${rec.notes ? `<tr><td>備註</td><td>${esc(rec.notes)}</td></tr>` : ''}
       <tr><td>申請狀態</td><td><span class="status-badge status-pending">待確認</span></td></tr>
     </table>
   `;
@@ -1219,76 +1461,55 @@ function resetReservation() {
     el.classList.toggle('active', i === 0);
   });
   document.getElementById('reserveForm').reset();
-  selectedSlot = '';
-  document.getElementById('slot-am').classList.remove('selected', 'full');
-  document.getElementById('slot-pm').classList.remove('selected', 'full');
+  selectedSite = '';
+  document.querySelectorAll('#siteChoices .slot-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('booked-times').textContent = '';
+  onTransportChange();
+  onPurposeChange();
+  document.getElementById('err-slot').textContent = '';
   document.getElementById('ack-rules').checked = false;
   document.getElementById('ack-privacy').checked = false;
-  document.querySelectorAll('.field-error').forEach(e => e.textContent = '');
-  document.querySelectorAll('input.error, select.error, textarea.error').forEach(e => e.classList.remove('error'));
 }
 
-// ── Query ─────────────────────────────────────────────────────────────────────
 async function queryByRef() {
   const ref = document.getElementById('q-ref').value.trim().toUpperCase();
   const el = document.getElementById('query-result');
+  if (!ref) return;
   el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:12px;">查詢中…</p>';
   let rec = null;
-  if (SCRIPT_URL) {
-    try {
-      const res = await fetch(SCRIPT_URL + '?action=list');
-      const data = await res.json();
-      if (data.success) {
-        rec = data.records.find(r => String(r.ref).toUpperCase() === ref) || null;
-        if (rec) {
-          // 同步更新 localStorage 狀態
-          const local = getReservations();
-          const li = local.findIndex(r => r.ref.toUpperCase() === ref);
-          if (li !== -1) { local[li].status = rec.status; local[li].cancelReason = rec.cancelReason; saveReservations(local); }
-        }
-      }
-    } catch(e) { /* 若失敗改用 localStorage */ }
-  }
-  if (!rec) {
-    const all = getReservations();
-    rec = all.find(r => r.ref.toUpperCase() === ref);
-  }
-  if (!rec) {
-    el.innerHTML = '<div class="alert alert-error">❌ 查無此預約編號，請確認輸入是否正確。</div>';
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=query&ref=' + encodeURIComponent(ref));
+    const data = await res.json();
+    if (data.success) rec = data.record;
+  } catch(e) {
+    el.innerHTML = '<div class="alert alert-error">&#10060; 無法連線，請稍後再試。</div>';
     return;
   }
-  el.innerHTML = renderReservationCard(rec, true);
-}
-
-function renderRecentReservations() {
-  // 只顯示此瀏覽器填寫的預約（localStorage）
-  const local = getReservations().slice().reverse().slice(0, 10);
-  const el = document.getElementById('recent-reservations');
-  if (!local.length) {
-    el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">目前尚無預約記錄。</p>';
+  if (!rec) {
+    el.innerHTML = '<div class="alert alert-error">&#10060; 查無此預約編號，請確認輸入是否正確。</div>';
     return;
   }
-  el.innerHTML = local.map(r => renderReservationCard(r, true)).join('');
+  el.innerHTML = renderReservationCard(rec);
 }
 
-function renderReservationCard(rec, showCancel) {
-  // 處理 Google Sheets 回傳的 ISO 日期格式（如 2026-04-01T16:00:00.000Z）
-  const dateStr = String(rec.date).length > 10 ? String(rec.date).substring(0, 10) : String(rec.date);
-  const dateDisplay = dateStr.replace(/-/g, '/');
+function renderReservationCard(rec) {
+  const dateDisplay = dateOnly(rec.date).replace(/-/g, '/');
   const statusBadge = {
     pending: '<span class="status-badge status-pending">待確認</span>',
     confirmed: '<span class="status-badge status-confirmed">已確認</span>',
     cancelled: '<span class="status-badge status-cancelled">已取消</span>'
   }[rec.status] || '';
-  const cancelBtn = (showCancel && rec.status !== 'cancelled')
-    ? `<button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;" onclick="cancelReservation('${rec.ref}')">取消預約</button>`
-    : '';
+  // 參觀日 2 日前可線上取消；1 日內請來電
+  const cancelBtn = rec.status === 'cancelled' ? ''
+    : daysUntil(rec.date) >= CANCEL_DAYS
+      ? `<button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;" onclick="cancelReservation('${esc(rec.ref)}')">取消預約</button>`
+      : `<div style="font-size:12px;color:var(--text-muted);text-align:right;line-height:1.6;">參觀日前 1 日內如需取消<br>請來電 ${CONTACT_TEL}</div>`;
   return `
     <div class="reservation-item ${rec.status === 'cancelled' ? 'cancelled' : ''}">
       <div class="ri-info">
-        <div class="ref">預約編號：${rec.ref}</div>
-        <div class="name">${rec.org}</div>
-        <div class="detail">📅 ${dateDisplay} &nbsp;⏰ ${rec.slotLabel} &nbsp;👥 ${rec.count} 人</div>
+        <div class="ref">預約編號：${esc(rec.ref)} ${siteTag(rec)}</div>
+        <div class="name">${esc(rec.org)}</div>
+        <div class="detail">&#128205; ${esc(siteFull(rec))} &nbsp;&#128197; ${dateDisplay} &nbsp;&#9200; ${esc(timeLabel(rec))} &nbsp;&#128101; ${esc(rec.count)} 人</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
         ${statusBadge}
@@ -1297,490 +1518,320 @@ function renderReservationCard(rec, showCancel) {
     </div>`;
 }
 
+// 申請者線上取消：參觀日 2 日前可自行取消，須輸入申請時的手機或 Email 核對身分；1 日內請來電
+const CANCEL_DAYS = 2, CONTACT_TEL = '02-22670321 分機 6007';
+let _visitorCancelRef = null;
+
+function daysUntil(date) {
+  const d = new Date(dateOnly(date) + 'T00:00:00');
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return Math.round((d - today) / 86400000);
+}
+
 function cancelReservation(ref) {
-  if (!confirm(`確定要取消預約 ${ref} 嗎？\n取消後請來電告知：02-22670321 分機 6003`)) return;
-  const all = getReservations();
-  const idx = all.findIndex(r => r.ref === ref);
-  if (idx === -1) return;
-  all[idx].status = 'cancelled';
-  saveReservations(all);
-  renderRecentReservations();
-  const qRes = document.getElementById('query-result');
-  if (qRes.innerHTML.includes(ref)) {
-    const el = document.getElementById('q-ref');
-    el.value = ref;
+  _visitorCancelRef = ref;
+  document.getElementById('vc-summary').textContent =
+    `預約編號 ${ref}。取消後，系統會通知參觀場區的同仁，並寄確認信給您。`;
+  document.getElementById('vc-contact').value = '';
+  document.getElementById('vc-reason').value = '';
+  document.getElementById('vc-err').textContent = '';
+  document.getElementById('visitorCancelModal').classList.add('open');
+  document.getElementById('vc-contact').focus();
+}
+
+async function submitVisitorCancel() {
+  const contact = document.getElementById('vc-contact').value.trim();
+  const err = document.getElementById('vc-err');
+  if (!contact) { err.textContent = '請輸入申請時填寫的手機或 E-Mail。'; return; }
+  const btn = document.getElementById('vc-submit');
+  btn.disabled = true; btn.textContent = '處理中…';
+  try {
+    const data = await postApi({ action: 'cancel', ref: _visitorCancelRef, contact,
+                                 reason: document.getElementById('vc-reason').value.trim() });
+    if (!data.success) { err.textContent = data.error || '取消失敗，請稍後再試。'; return; }
+    document.getElementById('visitorCancelModal').classList.remove('open');
+    alert('預約已取消，確認信已寄至您的信箱。');
+    document.getElementById('q-ref').value = _visitorCancelRef;
     queryByRef();
-  }
-  alert('預約已取消。如有疑問請來電：02-22670321 分機 6003');
-}
-
-// ── Admin Auth ────────────────────────────────────────────────────────────────
-const ADMIN_KEY = 'ttri_admins';
-let adminLoggedIn = false;
-let currentAdminEmail = '';
-
-// Simple hash (FNV-1a 64bit simulation via string operations for browser compatibility)
-function simpleHash(str) {
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < str.length; i++) {
-    hash ^= str.charCodeAt(i);
-    hash = (hash * 0x01000193) >>> 0;
-  }
-  // Mix with length for extra uniqueness
-  hash ^= str.length * 0x9e3779b9;
-  return (hash >>> 0).toString(16).padStart(8,'0') + str.split('').reverse()
-    .reduce((a,c)=>((a<<5)-a+c.charCodeAt(0))|0, 5381).toString(16).padStart(8,'0');
-}
-
-function getAdmins() {
-  try { return JSON.parse(localStorage.getItem(ADMIN_KEY) || '[]'); } catch { return []; }
-}
-function saveAdmins(arr) { localStorage.setItem(ADMIN_KEY, JSON.stringify(arr)); }
-
-function initAdminAccounts() {
-  const admins = getAdmins();
-  // 若無帳號，或仍是舊版 Email 帳號，重設為新帳號
-  const hasNew = admins.some(a => a.email === 'ttri1959');
-  if (!admins.length || !hasNew) {
-    const others = admins.filter(a => a.email !== 'service@ttri.org.tw' && a.email !== 'ttri1959');
-    saveAdmins([{
-      email: 'ttri1959',
-      hash: simpleHash('Ttri01891206@'),
-      name: '系統管理員',
-      createdAt: new Date().toISOString()
-    }, ...others]);
+  } catch(e) {
+    err.textContent = '無法連線，請稍後再試或來電 ' + CONTACT_TEL + '。';
+  } finally {
+    btn.disabled = false; btn.textContent = '確定取消預約';
   }
 }
 
-function adminLogin() {
-  const email = document.getElementById('admin-email-div').value.trim().toLowerCase();
-  const pw    = document.getElementById('admin-pw').value;
-  const admins = getAdmins();
-  const found  = admins.find(a => a.email.toLowerCase() === email && a.hash === simpleHash(pw));
-  if (found) {
-    adminLoggedIn = true;
-    currentAdminEmail = found.email;
-    document.getElementById('admin-login-area').style.display = 'none';
-    document.getElementById('admin-panel').style.display = 'block';
-    document.getElementById('admin-current-user').textContent = `登入者：${found.name}（${found.email}）`;
-    switchAdminTab('reservations');
-    renderAdminStats();
-    renderAdminTable();
-  } else {
-    document.getElementById('admin-login-err').textContent = '帳號或密碼錯誤，請重試。';
+// ── Admin：登入（帳密在 Apps Script 後端驗證）────────────────────────────────
+const SESSION_KEY = 'ttri_admin_session';
+let adminSession = null;   // { token, name, username }
+let adminCache = [];
+
+function loadSession() {
+  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; }
+}
+function storeSession(s) {
+  try { s ? sessionStorage.setItem(SESSION_KEY, JSON.stringify(s)) : sessionStorage.removeItem(SESSION_KEY); } catch {}
+}
+
+// 帶登入憑證呼叫後端；憑證失效時自動登出
+async function adminApi(action, payload = {}) {
+  let data;
+  try {
+    data = await postApi({ ...payload, action, token: adminSession && adminSession.token });
+  } catch(e) {
+    throw new Error('無法連線至伺服器，請稍後再試。');
+  }
+  if (data.error === 'unauthorized') {
+    adminLogout('登入已逾時，請重新登入。');
+    throw new Error('登入已逾時，請重新登入。');
+  }
+  if (!data.success) throw new Error(data.error || '未知錯誤');
+  return data;
+}
+
+async function adminLogin() {
+  const username = document.getElementById('admin-email-div').value.trim().toLowerCase();
+  const password = document.getElementById('admin-pw').value;
+  const err = document.getElementById('admin-login-err');
+  const btn = document.getElementById('btn-admin-login');
+  if (!username || !password) { err.textContent = '請輸入帳號及密碼。'; return; }
+  err.textContent = '';
+  btn.disabled = true; btn.textContent = '登入中…';
+  try {
+    const data = await postApi({ action:'login', username, password });
+    if (!data.success) { err.textContent = data.error || '帳號或密碼錯誤。'; return; }
+    adminSession = { token: data.token, name: data.name, username: data.username };
+    storeSession(adminSession);
+    document.getElementById('admin-pw').value = '';
+    enterAdminPanel();
+  } catch(e) {
+    err.textContent = '無法連線至伺服器，請稍後再試。';
+  } finally {
+    btn.disabled = false; btn.textContent = '登入';
   }
 }
-function adminLogout() {
-  adminLoggedIn = false;
-  currentAdminEmail = '';
+
+function enterAdminPanel() {
+  document.getElementById('admin-login-area').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  document.getElementById('admin-current-user').textContent = `登入者：${adminSession.name}`;
+  switchAdminTab('reservations');
+}
+
+function adminLogout(message) {
+  if (adminSession && typeof message !== 'string') {
+    postApi({ action:'logout', token: adminSession.token }).catch(() => {});
+  }
+  adminSession = null;
+  adminCache = [];
+  storeSession(null);
   document.getElementById('admin-panel').style.display = 'none';
   document.getElementById('admin-login-area').style.display = 'block';
-  document.getElementById('admin-email-div').value = '';
   document.getElementById('admin-pw').value = '';
-  document.getElementById('admin-login-err').textContent = '';
+  document.getElementById('admin-login-err').textContent = typeof message === 'string' ? message : '';
 }
 
-// ── Forgot Password ────────────────────────────────────────────────────────────
-const FORGOT_RESET_CODE = 'TTRI@Reset';
-
-function openForgotModal() {
-  document.getElementById('forgot-reset-code').value = '';
-  document.getElementById('forgot-new-pw').value = '';
-  document.getElementById('forgot-new-pw2').value = '';
-  document.getElementById('forgot-step1-err').textContent = '';
-  document.getElementById('forgot-step2-err').textContent = '';
-  ['forgot-step1','forgot-step2','forgot-step3'].forEach((id,i) => {
-    document.getElementById(id).classList.toggle('active', i === 0);
-  });
-  document.getElementById('forgotModal').classList.add('active');
-}
-
-function closeForgotModal() {
-  document.getElementById('forgotModal').classList.remove('active');
-}
-
-function forgotVerifyCode() {
-  const code = document.getElementById('forgot-reset-code').value;
-  if (code !== FORGOT_RESET_CODE) {
-    document.getElementById('forgot-step1-err').textContent = '重設碼錯誤，請重試。';
-    return;
-  }
-  // 填入帳號列表
-  const admins = getAdmins();
-  const sel = document.getElementById('forgot-account-select');
-  sel.innerHTML = admins.map(a => `<option value="${a.email}">${a.name}（${a.email}）</option>`).join('');
-  document.getElementById('forgot-step1').classList.remove('active');
-  document.getElementById('forgot-step2').classList.add('active');
-}
-
-function forgotResetPassword() {
-  const email = document.getElementById('forgot-account-select').value;
-  const pw1 = document.getElementById('forgot-new-pw').value;
-  const pw2 = document.getElementById('forgot-new-pw2').value;
-  const errEl = document.getElementById('forgot-step2-err');
-  if (!pw1) { errEl.textContent = '請輸入新密碼。'; return; }
-  if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}/.test(pw1)) {
-    errEl.textContent = '密碼須至少 8 碼，並包含大寫、小寫英文及數字。'; return;
-  }
-  if (pw1 !== pw2) { errEl.textContent = '兩次輸入的密碼不一致。'; return; }
-  const admins = getAdmins();
-  const idx = admins.findIndex(a => a.email === email);
-  if (idx === -1) { errEl.textContent = '找不到該帳號。'; return; }
-  admins[idx].hash = simpleHash(pw1);
-  saveAdmins(admins);
-  document.getElementById('forgot-step2').classList.remove('active');
-  document.getElementById('forgot-step3').classList.add('active');
-}
-
-// ── Admin Tabs ─────────────────────────────────────────────────────────────────
+const ADMIN_TABS = ['reservations', 'staff', 'accounts'];
 function switchAdminTab(tab) {
-  document.getElementById('admin-tab-reservations').style.display = tab === 'reservations' ? 'block' : 'none';
-  document.getElementById('admin-tab-accounts').style.display     = tab === 'accounts'     ? 'block' : 'none';
-  document.getElementById('tab-reservations').className = 'btn ' + (tab === 'reservations' ? 'btn-primary' : 'btn-secondary');
-  document.getElementById('tab-accounts').className     = 'btn ' + (tab === 'accounts'     ? 'btn-primary' : 'btn-secondary');
-  if (tab === 'accounts') renderAccountList();
+  ADMIN_TABS.forEach(t => {
+    document.getElementById('admin-tab-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('tab-' + t).className = 'btn ' + (t === tab ? 'btn-primary' : 'btn-secondary');
+  });
   if (tab === 'reservations') loadAdminData();
+  if (tab === 'staff') loadStaff();
+  if (tab === 'accounts') renderAccountList();
 }
 
+// ── Admin: 預約管理 ───────────────────────────────────────────────────────────
+const ADMIN_COLS = 12;
 async function loadAdminData() {
   const tbody = document.getElementById('adminTableBody');
-  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--text-muted);">載入中…</td></tr>';
-  if (!SCRIPT_URL) {
-    adminCache = getReservations();
-    renderAdminStats(); renderAdminTable(); return;
-  }
+  tbody.innerHTML = `<tr><td colspan="${ADMIN_COLS}" style="text-align:center;padding:24px;">載入中…</td></tr>`;
   try {
-    const res = await fetch(SCRIPT_URL + '?action=list');
-    const data = await res.json();
-    if (data.success) {
-      adminCache = data.records.map(r => ({...r, count: String(r.count)}));
-      renderAdminStats(); renderAdminTable();
-    } else {
-      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--error);">讀取失敗：' + (data.error||'未知錯誤') + '</td></tr>';
-    }
+    const data = await adminApi('list');
+    adminCache = data.records;
+    renderAdminStats();
+    renderAdminTable();
   } catch(e) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--error);">連線失敗，請確認 Apps Script 網址是否正確。</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="${ADMIN_COLS}" style="text-align:center;padding:24px;color:var(--error);">${esc(e.message)}</td></tr>`;
   }
 }
 
-// ── Account Management ─────────────────────────────────────────────────────────
-function renderAccountList() {
-  const admins = getAdmins();
-  const el = document.getElementById('account-list');
-  if (!admins.length) { el.innerHTML = '<p style="color:var(--text-muted);padding:16px;">尚無管理員帳號。</p>'; return; }
-  el.innerHTML = `<table class="admin-table" style="margin-top:8px;">
-    <thead><tr><th>姓名</th><th>帳號</th><th>建立時間</th><th>操作</th></tr></thead>
-    <tbody>${admins.map(a => `
-      <tr>
-        <td>${a.name}</td>
-        <td>${a.email}</td>
-        <td>${new Date(a.createdAt).toLocaleString('zh-TW')}</td>
-        <td>${a.email === currentAdminEmail
-          ? '<span style="font-size:12px;color:var(--text-muted);">（目前登入）</span>'
-          : `<button class="btn btn-danger" style="font-size:11px;padding:5px 10px;" onclick="deleteAdmin('${a.email}')">刪除</button>`
-        }</td>
-      </tr>`).join('')}
-    </tbody></table>`;
-}
-function showAddAccountForm()  { document.getElementById('add-account-form').style.display = 'block'; }
-function hideAddAccountForm()  {
-  document.getElementById('add-account-form').style.display = 'none';
-  ['new-admin-name','new-admin-email','new-admin-pass','new-admin-pass2'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('add-account-err').textContent = '';
-}
-function addAdminAccount() {
-  const name  = document.getElementById('new-admin-name').value.trim();
-  const email = document.getElementById('new-admin-email').value.trim().toLowerCase();
-  const pass  = document.getElementById('new-admin-pass').value;
-  const pass2 = document.getElementById('new-admin-pass2').value;
-  const err   = document.getElementById('add-account-err');
-  if (!name)              { err.textContent = '請輸入姓名。'; return; }
-  if (!email || email.length < 3) { err.textContent = '請輸入帳號（至少3個字元）。'; return; }
-  if (!/^[a-zA-Z0-9_@.\-]+$/.test(email)) { err.textContent = '帳號只能使用英文、數字及底線。'; return; }
-  if (pass.length < 8)             { err.textContent = '密碼至少需要 8 個字元。'; return; }
-  if (!/[A-Z]/.test(pass))        { err.textContent = '密碼須包含至少一個大寫字母（A-Z）。'; return; }
-  if (!/[a-z]/.test(pass))        { err.textContent = '密碼須包含至少一個小寫字母（a-z）。'; return; }
-  if (!/[0-9]/.test(pass))        { err.textContent = '密碼須包含至少一個數字（0-9）。'; return; }
-  if (pass !== pass2)              { err.textContent = '兩次密碼不一致。'; return; }
-  const admins = getAdmins();
-  if (admins.find(a => a.email.toLowerCase() === email)) { err.textContent = '此帳號已存在。'; return; }
-  admins.push({ email, hash: simpleHash(pass), name, createdAt: new Date().toISOString() });
-  saveAdmins(admins);
-  hideAddAccountForm();
-  renderAccountList();
-  alert(`管理員帳號「${name}（${email}）」已新增。`);
-}
-function deleteAdmin(email) {
-  if (!confirm(`確定要刪除帳號 ${email} 嗎？`)) return;
-  saveAdmins(getAdmins().filter(a => a.email !== email));
-  renderAccountList();
+function adminSiteFiltered() {
+  const site = document.getElementById('admin-filter-site').value;
+  return site ? adminCache.filter(r => siteOf(r) === site) : adminCache;
 }
 
-// ── Hidden admin access ───────────────────────────────────────────────────────
-// 方法一：網址加 ?admin  → https://yoursite/?admin
-// 方法二：點頁尾隱藏區域 5 次
-let footerClickCount = 0;
-document.addEventListener('DOMContentLoaded', () => {
-  // 網址參數進入後台
-  if (window.location.search.includes('admin')) {
-    showPage('admin');
-    // 清除網址列的 ?admin，避免書籤外洩
-    history.replaceState(null, '', window.location.pathname);
-  }
-
-  // 頁尾隱藏觸發（點 5 次）
-  const trigger = document.getElementById('adminAccessTrigger');
-  if (trigger) {
-    trigger.addEventListener('click', () => {
-      footerClickCount++;
-      if (footerClickCount >= 5) {
-        footerClickCount = 0;
-        showPage('admin');
-      }
-    });
-  }
-  initAdminAccounts();
-});
+function getFilteredAdmin() {
+  const filterStatus = document.getElementById('admin-filter-status').value;
+  const search = document.getElementById('admin-search').value.toLowerCase();
+  let all = adminSiteFiltered().slice().reverse();
+  if (filterStatus) all = all.filter(r => r.status === filterStatus);
+  if (search) all = all.filter(r =>
+    String(r.org).toLowerCase().includes(search) ||
+    String(r.name).toLowerCase().includes(search) ||
+    String(r.ref).toLowerCase().includes(search)
+  );
+  return all;
+}
 
 function renderAdminStats() {
-  const all = adminCache;
+  const all = adminSiteFiltered();
   const stats = {
     total: all.length,
     pending: all.filter(r => r.status === 'pending').length,
     confirmed: all.filter(r => r.status === 'confirmed').length,
     cancelled: all.filter(r => r.status === 'cancelled').length
   };
-  document.getElementById('adminStats').innerHTML = `
-    <div class="stat-card"><div class="num">${stats.total}</div><div class="lbl">全部預約</div></div>
-    <div class="stat-card"><div class="num" style="color:var(--warning)">${stats.pending}</div><div class="lbl">待確認</div></div>
-    <div class="stat-card"><div class="num" style="color:var(--success)">${stats.confirmed}</div><div class="lbl">已確認</div></div>
-    <div class="stat-card"><div class="num" style="color:var(--error)">${stats.cancelled}</div><div class="lbl">已取消</div></div>
-  `;
+  const el = document.getElementById('adminStats');
+  if (el) {
+    el.innerHTML = `
+      <div class="stat-card"><div class="num">${stats.total}</div><div class="lbl">全部預約</div></div>
+      <div class="stat-card"><div class="num" style="color:var(--warning)">${stats.pending}</div><div class="lbl">待確認</div></div>
+      <div class="stat-card"><div class="num" style="color:var(--success)">${stats.confirmed}</div><div class="lbl">已確認</div></div>
+      <div class="stat-card"><div class="num" style="color:var(--error)">${stats.cancelled}</div><div class="lbl">已取消</div></div>
+    `;
+  }
 }
 
 function renderAdminTable() {
-  const filterStatus = document.getElementById('admin-filter-status').value;
-  const search = document.getElementById('admin-search').value.toLowerCase();
-  let all = adminCache.slice().reverse();
-  if (filterStatus) all = all.filter(r => r.status === filterStatus);
-  if (search) all = all.filter(r =>
-    r.org.toLowerCase().includes(search) ||
-    r.name.toLowerCase().includes(search) ||
-    r.ref.toLowerCase().includes(search)
-  );
+  const all = getFilteredAdmin();
   const tbody = document.getElementById('adminTableBody');
+  document.getElementById('chk-all').checked = false;
+  updateDeleteBtn();
   if (!all.length) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:24px;">無資料</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="${ADMIN_COLS}" style="text-align:center;color:var(--text-muted);padding:24px;">無資料</td></tr>`;
     return;
   }
   const statusLabel = { pending:'待確認', confirmed:'已確認', cancelled:'已取消' };
-  tbody.innerHTML = all.map(r => {
-    return `<tr>
-      <td><input type="checkbox" class="row-chk" value="${r.ref}" onchange="updateDeleteBtn()"></td>
-      <td style="font-size:11px;letter-spacing:0.5px">${r.ref}</td>
-      <td>${r.org}</td>
-      <td>${r.name}</td>
-      <td>${r.tel}</td>
-      <td style="font-size:12px;"><a href="mailto:${r.email}" style="color:var(--primary);">${r.email}</a></td>
-      <td>${String(r.date).length > 10 ? String(r.date).substring(0,10) : r.date}</td>
-      <td>${r.slot === 'morning' ? '上午' : '下午'}</td>
-      <td>${r.count}</td>
-      <td><span class="status-badge status-${r.status}">${statusLabel[r.status]||r.status}</span></td>
+  tbody.innerHTML = all.map(r => `
+    <tr>
+      <td><input type="checkbox" class="row-chk" value="${esc(r.ref)}" onchange="updateDeleteBtn()"></td>
+      <td style="font-size:11px;letter-spacing:0.5px">${esc(r.ref)}</td>
+      <td>${siteTag(r)}</td>
+      <td>${esc(r.org)}</td>
+      <td>${esc(r.name)}</td>
+      <td style="white-space:nowrap;">${[telLabel(r), r.mobile].filter(Boolean).map(esc).join('<br>')}</td>
+      <td style="font-size:12px;">${esc(r.email)}</td>
+      <td>${esc(dateOnly(r.date))}</td>
+      <td style="white-space:nowrap;">${esc(timeLabel(r))}</td>
+      <td>${esc(r.count)}</td>
+      <td><span class="status-badge status-${esc(r.status)}">${statusLabel[r.status] || esc(r.status)}</span></td>
       <td>
         <div class="action-btns">
-          ${r.status !== 'confirmed' ? `<button class="btn-confirm" onclick="confirmReservation('${r.ref}')">✅ 確認</button>` : ''}
-          ${r.status !== 'cancelled' ? `<button class="btn-reject"  onclick="cancelReservation('${r.ref}')">❌ 取消</button>` : ''}
-          <button class="btn-notify" onclick="sendNotifyEmail('${r.ref}')">📧 通知</button>
-          <button class="btn-detail" onclick="viewDetail('${r.ref}')">詳細</button>
+          <button class="btn-confirm" onclick="confirmRes('${esc(r.ref)}')">&#9989; 確認</button>
+          <button class="btn-reject"  onclick="cancelRes('${esc(r.ref)}')">&#10060; 取消</button>
+          <button class="btn-notify" onclick="sendNotifyEmail('${esc(r.ref)}')" title="寄信給申請單位">&#128231; 通知申請人</button>
+          <button class="btn-detail" onclick="openStaffNotify('${esc(r.ref)}')" title="勾選紡織所同仁寄送通知">&#128101; 通知同仁</button>
         </div>
+        ${r.notifiedStaff ? `<div class="notified-note">&#10003; 已通知：${esc(r.notifiedStaff)}</div>` : ''}
       </td>
-    </tr>`;
-  }).join('');
+    </tr>
+  `).join('');
 }
 
-async function updateStatus(ref, status, cancelReason) {
-  // 更新 adminCache
-  const idx = adminCache.findIndex(r => r.ref === ref);
-  if (idx !== -1) {
-    adminCache[idx].status = status;
-    if (cancelReason) adminCache[idx].cancelReason = cancelReason;
+async function confirmRes(ref) {
+  if (confirm('確認此預約？')) {
+    await updateStatus(ref, 'confirmed');
   }
-  // 同步更新 localStorage（若有）
-  const local = getReservations();
-  const li = local.findIndex(r => r.ref === ref);
-  if (li !== -1) { local[li].status = status; if (cancelReason) local[li].cancelReason = cancelReason; saveReservations(local); }
-  renderAdminStats(); renderAdminTable();
-  // 同步 Apps Script
-  if (SCRIPT_URL) {
-    try {
-      await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'update', ref, status, cancelReason: cancelReason||'' }) });
-    } catch(e) { console.warn('Apps Script 更新失敗', e); }
-  }
-}
-
-async function confirmReservation(ref) {
-  if (!confirm('確認此預約申請？\n系統將開啟 Email 通知申請者。')) return;
-  await updateStatus(ref, 'confirmed');
-  sendNotifyEmail(ref);
 }
 
 let _cancelRef = null;
-function cancelReservation(ref) {
+function cancelRes(ref) {
   _cancelRef = ref;
   document.getElementById('cancelReasonInput').value = '';
   document.getElementById('cancelReasonErr').textContent = '';
   document.getElementById('cancelModal').classList.add('open');
 }
-function closeCancelModal() {
-  _cancelRef = null;
-  document.getElementById('cancelModal').classList.remove('open');
+
+async function updateStatus(ref, status, reason = '') {
+  try {
+    await adminApi('update', { ref, status, cancelReason: reason });
+  } catch(e) {
+    alert('更新失敗：' + e.message);
+  }
+  if (adminSession) loadAdminData();
 }
+
 async function confirmCancel() {
   const reason = document.getElementById('cancelReasonInput').value.trim();
-  if (!reason) {
-    document.getElementById('cancelReasonErr').textContent = '請填寫取消原因';
-    return;
-  }
-  const ref = _cancelRef;
-  closeCancelModal();
-  await updateStatus(ref, 'cancelled', reason);
-  sendNotifyEmail(ref);
+  document.getElementById('cancelModal').classList.remove('open');
+  await updateStatus(_cancelRef, 'cancelled', reason);
+}
+
+function closeCancelModal() {
+  document.getElementById('cancelModal').classList.remove('open');
 }
 
 function sendNotifyEmail(ref) {
-  const rec = adminCache.find(r => r.ref === ref) || getReservations().find(r => r.ref === ref);
+  const rec = adminCache.find(r => r.ref === ref);
   if (!rec) return;
   const statusMap = { confirmed:'已確認', cancelled:'已取消', pending:'待確認' };
-  const statusLabel = statusMap[rec.status] || rec.status;
-  const dateDisplay = rec.date.replace(/-/g,'/');
-
-  let subject, body;
-  if (rec.status === 'confirmed') {
-    subject = `【紡織印象館】參訪預約確認通知 – 編號 ${rec.ref}`;
-    body =
+  const dateDisplay = dateOnly(rec.date).replace(/-/g, '/');
+  const subject = `【紡織印象館】參訪預約通知 – 編號 ${rec.ref}`;
+  const body =
 `親愛的 ${rec.name} 您好，
 
-感謝您申請紡織印象館參訪預約，您的預約已【確認】。
-
-──────────────────────────
-▍預約資訊
-  預約編號：${rec.ref}
-  申請單位：${rec.org}
-  聯絡人　：${rec.name}
-  參觀日期：${dateDisplay}（${rec.slot === 'morning' ? '星期' + '日一二三四五六'[new Date(rec.date).getDay()] : '星期' + '日一二三四五六'[new Date(rec.date).getDay()]}）
-  參觀時段：${rec.slotLabel}
-  參觀人數：${rec.count} 人
-──────────────────────────
-
-請於預約當日準時抵達，若有任何問題歡迎與我們聯絡。
-
-承辦人：尚小姐
-電　話：02-22670321 分機 6003
-E-Mail：mhsheng.0805@ttri.org.tw
-
-財團法人紡織產業綜合研究所 · 紡織印象館`;
-  } else if (rec.status === 'cancelled') {
-    subject = `【紡織印象館】參訪預約取消通知 – 編號 ${rec.ref}`;
-    body =
-`親愛的 ${rec.name} 您好，
-
-很抱歉通知您，您的紡織印象館參訪預約已【取消】。
-
-──────────────────────────
-▍預約資訊
-  預約編號：${rec.ref}
-  申請單位：${rec.org}
-  聯絡人　：${rec.name}
-  參觀日期：${dateDisplay}
-  參觀時段：${rec.slotLabel}
-  參觀人數：${rec.count} 人
-${rec.cancelReason ? `\n▍取消原因\n  ${rec.cancelReason}\n` : ''}──────────────────────────
-
-如需重新安排參訪，歡迎再次透過系統預約，或直接與我們聯絡。
-
-承辦人：尚小姐
-電　話：02-22670321 分機 6003
-E-Mail：mhsheng.0805@ttri.org.tw
-
-財團法人紡織產業綜合研究所 · 紡織印象館`;
-  } else {
-    subject = `【紡織印象館】參訪預約通知 – 編號 ${rec.ref}`;
-    body =
-`親愛的 ${rec.name} 您好，
-
-您的紡織印象館參訪預約狀態為【${statusLabel}】。
+您的紡織印象館參訪預約狀態為【${statusMap[rec.status] || rec.status}】。
 
 ──────────────────────────
   預約編號：${rec.ref}
+  參訪場區：${siteFull(rec)}
   申請單位：${rec.org}
   參觀日期：${dateDisplay}
-  參觀時段：${rec.slotLabel}
+  參觀時間：${timeLabel(rec)}
   參觀人數：${rec.count} 人
-──────────────────────────
+  交通方式：${transportLabel(rec)}
+${rec.status === 'cancelled' && rec.cancelReason ? `  取消原因：${rec.cancelReason}\n` : ''}──────────────────────────
 
-承辦人：尚小姐
-電　話：02-22670321 分機 6003
-E-Mail：mhsheng.0805@ttri.org.tw
+電　話：02-22670321 分機 6007
+E-Mail：service@ttri.org.tw
 
 財團法人紡織產業綜合研究所 · 紡織印象館`;
-  }
-
-  const mailto = `mailto:${rec.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.open(mailto);
+  window.open(`mailto:${rec.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
 }
 
-function exportExcel() {
-  const all = getReservations();
-  if (!all.length) { alert('目前無資料可匯出。'); return; }
-  const statusMap = { pending:'待確認', confirmed:'已確認', cancelled:'已取消' };
-  const rows = all.map(r => ({
+const STATUS_ZH = { pending:'待確認', confirmed:'已確認', cancelled:'已取消' };
+function exportRows() {
+  return getFilteredAdmin().map(r => ({
     '預約編號': r.ref,
+    '參訪場區': siteFull(r),
     '申請單位': r.org,
     '聯絡人': r.name,
     '電話': r.tel,
+    '分機': r.telExt || '',
+    '手機': r.mobile || '',
     'Email': r.email,
-    '參觀日期': r.date,
-    '時段': r.slot === 'morning' ? '上午 09:30–12:00' : '下午 13:30–16:30',
+    '參觀日期': dateOnly(r.date),
+    '參觀時間': timeLabel(r),
     '人數': Number(r.count),
     '參觀目的': r.purpose,
+    '交通方式': r.transport || '',
+    '遊覽車車號': r.busPlate || '',
     '備註': r.notes || '',
-    '狀態': statusMap[r.status] || r.status,
+    '狀態': STATUS_ZH[r.status] || r.status,
     '取消原因': r.cancelReason || '',
-    '申請時間': new Date(r.createdAt).toLocaleString('zh-TW')
+    '已通知同仁': r.notifiedStaff || '',
+    '申請時間': r.createdAt ? new Date(r.createdAt).toLocaleString('zh-TW') : ''
   }));
+}
+
+function exportExcel() {
+  const rows = exportRows();
+  if (!rows.length) { alert('目前無資料可匯出。'); return; }
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [
-    {wch:16},{wch:20},{wch:10},{wch:14},{wch:26},
-    {wch:12},{wch:18},{wch:6},{wch:20},{wch:16},{wch:8},{wch:18}
-  ];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '預約清單');
   XLSX.writeFile(wb, `紡織印象館預約清單_${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
-function viewDetail(ref) {
-  const rec = getReservations().find(r => r.ref === ref);
-  if (!rec) return;
-  const dateDisplay = rec.date.replace(/-/g, '/');
-  const statusMap2 = { pending:'待確認', confirmed:'已確認', cancelled:'已取消' };
-  const cancelInfo = rec.cancelReason ? `\n取消原因：${rec.cancelReason}` : '';
-  alert(`【預約詳細資料】\n\n預約編號：${rec.ref}\n申請單位：${rec.org}\n聯絡人：${rec.name}\n電話：${rec.tel}\nEmail：${rec.email}\n參觀日期：${dateDisplay}\n時段：${rec.slotLabel}\n人數：${rec.count} 人\n參觀目的：${rec.purpose}\n備註：${rec.notes || '（無）'}\n狀態：${statusMap2[rec.status]||rec.status}${cancelInfo}\n申請時間：${new Date(rec.createdAt).toLocaleString('zh-TW')}`);
-}
-
 function exportCSV() {
-  const all = getReservations();
-  if (!all.length) { alert('目前無資料可匯出。'); return; }
-  const headers = ['預約編號','申請單位','聯絡人','電話','Email','參觀日期','時段','人數','目的','備註','狀態','申請時間'];
-  const rows = all.map(r => [
-    r.ref, r.org, r.name, r.tel, r.email, r.date,
-    r.slot === 'morning' ? '上午' : '下午',
-    r.count, r.purpose, r.notes,
-    r.status, new Date(r.createdAt).toLocaleString('zh-TW')
-  ].map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(','));
-  const csv = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const rows = exportRows();
+  if (!rows.length) { alert('目前無資料可匯出。'); return; }
+  const headers = Object.keys(rows[0]);
+  const lines = rows.map(r => headers.map(h => `"${String(r[h] == null ? '' : r[h]).replace(/"/g, '""')}"`).join(','));
+  const csv = '﻿' + [headers.join(','), ...lines].join('\r\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
   a.download = `紡織印象館預約清單_${new Date().toISOString().split('T')[0]}.csv`;
   a.click();
 }
@@ -1792,58 +1843,313 @@ function toggleAllCheckbox(chk) {
 function updateDeleteBtn() {
   const any = document.querySelectorAll('.row-chk:checked').length > 0;
   document.getElementById('btn-delete-selected').style.display = any ? 'inline-block' : 'none';
-  const all = document.querySelectorAll('.row-chk');
-  const allChecked = all.length > 0 && document.querySelectorAll('.row-chk:checked').length === all.length;
-  const chkAll = document.getElementById('chk-all');
-  if (chkAll) chkAll.checked = allChecked;
 }
 async function deleteSelected() {
   const checked = [...document.querySelectorAll('.row-chk:checked')].map(c => c.value);
   if (!checked.length) return;
   if (!confirm(`確定要刪除選取的 ${checked.length} 筆預約資料嗎？`)) return;
-  // 刪除 Apps Script 先做（確保雲端刪除成功）
-  if (SCRIPT_URL) {
-    try {
-      const res = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action:'deleteRefs', refs: checked })
-      });
-      const result = await res.json();
-      if (!result.success) {
-        alert('Google Sheets 刪除失敗：' + (result.error || '未知錯誤'));
-        return;
-      }
-    } catch(e) {
-      alert('無法連線至 Google Sheets，請檢查網路後重試。');
-      return;
-    }
+  try {
+    await adminApi('deleteRefs', { refs: checked });
+  } catch(e) {
+    alert('刪除失敗：' + e.message); return;
   }
-  // 刪除 adminCache 和 localStorage
-  adminCache = adminCache.filter(r => !checked.includes(String(r.ref)));
-  saveReservations(getReservations().filter(r => !checked.includes(String(r.ref))));
-  document.getElementById('btn-delete-selected').style.display = 'none';
-  renderAdminStats(); renderAdminTable();
-  alert(`已刪除 ${checked.length} 筆資料。`);
+  loadAdminData();
 }
-
 async function clearAll() {
   if (!confirm('確定要清除所有預約資料嗎？此操作無法復原。')) return;
-  if (!confirm('再次確認：清除 Google Sheets 及本機所有資料？')) return;
-  localStorage.removeItem(LS_KEY);
-  adminCache = [];
-  if (SCRIPT_URL) {
-    try {
-      await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'clearAll' }) });
-    } catch(e) { console.warn('Apps Script 清除失敗', e); }
+  if (!confirm('再次確認：清除 Google Sheets 上所有預約資料？')) return;
+  try {
+    await adminApi('clearAll');
+  } catch(e) {
+    alert('清除失敗：' + e.message); return;
   }
-  renderAdminStats();
-  renderAdminTable();
-  alert('所有資料已清除。');
+  loadAdminData();
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// ── Admin: 同仁名單（存在 Google Sheets 的 Staff 工作表）──────────────────────
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const STAFF_SITES = { tucheng: '土城場區', douliu: '斗六場區', both: '兩場區' };
+let staffCache = [];
+
+function staffSiteTag(s) { return `<span class="site-tag site-${esc(s.site)}">${esc(STAFF_SITES[s.site] || s.site)}</span>`; }
+
+async function fetchStaff() {
+  staffCache = (await adminApi('listStaff')).staff;
+  return staffCache;
+}
+
+async function loadStaff() {
+  const tbody = document.getElementById('staffTableBody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;">載入中…</td></tr>';
+  try {
+    await fetchStaff();
+    renderStaffTable();
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--error);">${esc(e.message)}</td></tr>`;
+  }
+}
+
+function renderStaffTable() {
+  const site = document.getElementById('staff-filter-site').value;
+  const order = { tucheng: 0, douliu: 1, both: 2 };
+  const rows = staffCache.filter(s => !site || s.site === site)
+    .sort((a, b) => (order[a.site] ?? 9) - (order[b.site] ?? 9));
+  const tbody = document.getElementById('staffTableBody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">尚無同仁資料，請按「+ 新增同仁」。</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(s => `
+    <tr>
+      <td>${staffSiteTag(s)}</td>
+      <td>${esc(s.name)}</td>
+      <td>${esc(s.unit)}</td>
+      <td style="font-size:12px;">${esc(s.email)}</td>
+      <td>${esc(s.phone)}</td>
+      <td>${s.autoNotify ? '&#10003; 是' : '<span style="color:var(--text-muted);">否</span>'}</td>
+      <td><div class="action-btns">
+        <button class="btn-detail" onclick="openStaffForm('${esc(s.id)}')">編輯</button>
+        <button class="btn-reject" onclick="deleteStaff('${esc(s.id)}')">刪除</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function openStaffForm(id) {
+  const s = staffCache.find(x => x.id === id) ||
+    { id: '', site: document.getElementById('staff-filter-site').value || 'tucheng', name: '', unit: '', email: '', phone: '', autoNotify: false };
+  document.getElementById('staff-form-title').textContent = s.id ? '編輯同仁' : '新增同仁';
+  document.getElementById('sf-id').value = s.id;
+  document.getElementById('sf-site').value = s.site;
+  document.getElementById('sf-name').value = s.name;
+  document.getElementById('sf-unit').value = s.unit;
+  document.getElementById('sf-email').value = s.email;
+  document.getElementById('sf-phone').value = s.phone;
+  document.getElementById('sf-auto').checked = !!s.autoNotify;
+  document.getElementById('sf-err').textContent = '';
+  const form = document.getElementById('staff-form');
+  form.style.display = 'block';
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('sf-name').focus({ preventScroll: true });
+}
+
+function closeStaffForm() { document.getElementById('staff-form').style.display = 'none'; }
+
+async function saveStaff() {
+  const staff = {
+    id: document.getElementById('sf-id').value,
+    site: document.getElementById('sf-site').value,
+    name: document.getElementById('sf-name').value.trim(),
+    unit: document.getElementById('sf-unit').value.trim(),
+    email: document.getElementById('sf-email').value.trim(),
+    phone: document.getElementById('sf-phone').value.trim(),
+    autoNotify: document.getElementById('sf-auto').checked
+  };
+  const err = document.getElementById('sf-err');
+  if (!staff.name) { err.textContent = '請輸入姓名。'; return; }
+  if (!EMAIL_RE.test(staff.email)) { err.textContent = 'E-Mail 格式不正確。'; return; }
+  const btn = document.getElementById('btn-save-staff');
+  btn.disabled = true; btn.textContent = '儲存中…';
+  try {
+    await adminApi('saveStaff', { staff });
+    closeStaffForm();
+    await loadStaff();
+  } catch(e) {
+    err.textContent = '儲存失敗：' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = '儲存';
+  }
+}
+
+async function deleteStaff(id) {
+  const s = staffCache.find(x => x.id === id);
+  if (!s || !confirm(`確定要從名單刪除「${s.name}」嗎？`)) return;
+  try {
+    await adminApi('deleteStaff', { id });
+  } catch(e) {
+    alert('刪除失敗：' + e.message); return;
+  }
+  loadStaff();
+}
+
+// ── Admin: 勾選同仁寄送預約通知 ──────────────────────────────────────────────
+let _notifyRef = null;
+
+function staffCheckbox(s) {
+  return `<label class="staff-item"><input type="checkbox" class="sn-chk" value="${esc(s.id)}">
+    <span>${esc(s.name)}${s.unit ? `（${esc(s.unit)}）` : ''}<span class="sub">${esc(s.email)}${s.phone ? `｜${esc(s.phone)}` : ''}</span></span></label>`;
+}
+
+async function openStaffNotify(ref) {
+  const r = adminCache.find(x => x.ref === ref);
+  if (!r) return;
+  _notifyRef = ref;
+  const statusLabel = { pending:'待確認', confirmed:'已確認', cancelled:'已取消' };
+  document.getElementById('sn-summary').innerHTML =
+    `${siteTag(r)} <strong>${esc(r.org)}</strong>（${esc(r.name)}）<br>` +
+    `${esc(dateOnly(r.date))} ${esc(timeLabel(r))}｜${esc(r.count)} 人｜${esc(r.purpose)}｜${statusLabel[r.status] || esc(r.status)}` +
+    (r.notifiedStaff ? `<div class="notified-note">&#10003; 先前已通知：${esc(r.notifiedStaff)}</div>` : '');
+  document.getElementById('sn-message').value = '';
+  document.getElementById('sn-err').textContent = '';
+  const list = document.getElementById('sn-list');
+  list.innerHTML = '<p style="color:var(--text-muted);padding:12px 0;">載入同仁名單…</p>';
+  document.getElementById('staffNotifyModal').classList.add('open');
+  try {
+    await fetchStaff();
+  } catch(e) {
+    list.innerHTML = `<p style="color:var(--error);padding:12px 0;">${esc(e.message)}</p>`; return;
+  }
+  const site = siteOf(r);
+  const mine = staffCache.filter(s => s.site === site || s.site === 'both');
+  const others = staffCache.filter(s => !mine.includes(s));
+  if (!staffCache.length) {
+    list.innerHTML = '<p style="color:var(--text-muted);padding:12px 0;">尚未建立同仁名單，請先到「&#128101; 同仁名單」新增。</p>';
+    return;
+  }
+  list.innerHTML =
+    `<div class="staff-group"><h4>${esc(SITES[site].full)}同仁</h4>` +
+    (mine.length ? `<div class="staff-pick">${mine.map(staffCheckbox).join('')}</div>`
+                 : '<p class="hint">此場區尚無同仁。</p>') + '</div>' +
+    (others.length ? `<details class="staff-group"><summary>其他場區同仁（${others.length}）</summary>` +
+                     `<div class="staff-pick">${others.map(staffCheckbox).join('')}</div></details>` : '');
+}
+
+async function sendStaffNotify() {
+  const staffIds = [...document.querySelectorAll('.sn-chk:checked')].map(c => c.value);
+  const err = document.getElementById('sn-err');
+  if (!staffIds.length) { err.textContent = '請至少勾選一位同仁。'; return; }
+  const btn = document.getElementById('sn-send');
+  btn.disabled = true; btn.textContent = '寄送中…';
+  try {
+    const data = await adminApi('notifyStaff', { ref: _notifyRef, staffIds, message: document.getElementById('sn-message').value.trim() });
+    document.getElementById('staffNotifyModal').classList.remove('open');
+    alert(`已寄出通知給 ${data.sent} 位同仁。`);
+    loadAdminData();
+  } catch(e) {
+    err.textContent = '寄送失敗：' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = '寄出通知';
+  }
+}
+
+// ── Admin: 帳號管理（存在 Google Sheets 的 Admins 工作表）──────────────────────
+const PASSWORD_RULE = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}/;
+
+async function renderAccountList() {
+  const el = document.getElementById('account-list');
+  el.innerHTML = '<p style="color:var(--text-muted);padding:16px;">載入中…</p>';
+  let admins;
+  try {
+    admins = (await adminApi('listAdmins')).admins;
+  } catch(e) {
+    el.innerHTML = `<p style="color:var(--error);padding:16px;">${esc(e.message)}</p>`; return;
+  }
+  el.innerHTML = `<table class="admin-table" style="margin-top:8px;">
+    <thead><tr><th>姓名</th><th>帳號</th><th>建立時間</th><th>操作</th></tr></thead>
+    <tbody>${admins.map(a => `
+      <tr>
+        <td>${esc(a.name)}</td>
+        <td>${esc(a.username)}</td>
+        <td>${a.createdAt ? new Date(a.createdAt).toLocaleString('zh-TW') : ''}</td>
+        <td>${a.username === adminSession.username
+          ? '<span style="font-size:12px;color:var(--text-muted);">（目前登入）</span>'
+          : `<button class="btn btn-danger" style="font-size:11px;padding:5px 10px;" onclick="deleteAdmin('${esc(a.username)}')">刪除</button>`
+        }</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+function showAddAccountForm() { document.getElementById('add-account-form').style.display = 'block'; }
+function hideAddAccountForm() {
+  document.getElementById('add-account-form').style.display = 'none';
+  ['new-admin-name','new-admin-email','new-admin-pass','new-admin-pass2'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('add-account-err').textContent = '';
+}
+async function addAdminAccount() {
+  const name     = document.getElementById('new-admin-name').value.trim();
+  const username = document.getElementById('new-admin-email').value.trim().toLowerCase();
+  const pass     = document.getElementById('new-admin-pass').value;
+  const pass2    = document.getElementById('new-admin-pass2').value;
+  const err      = document.getElementById('add-account-err');
+  if (!name) { err.textContent = '請輸入姓名。'; return; }
+  if (!/^[a-z0-9_.@\-]{3,}$/.test(username)) { err.textContent = '帳號至少 3 個字元，只能使用英文、數字及 _ . @ -'; return; }
+  if (!PASSWORD_RULE.test(pass)) { err.textContent = '密碼須至少 8 碼，並包含大寫、小寫英文及數字。'; return; }
+  if (pass !== pass2) { err.textContent = '兩次密碼不一致。'; return; }
+  try {
+    await adminApi('addAdmin', { username, name, password: pass });
+  } catch(e) {
+    err.textContent = e.message; return;
+  }
+  hideAddAccountForm();
+  renderAccountList();
+}
+async function deleteAdmin(username) {
+  if (!confirm(`確定要刪除帳號 ${username} 嗎？`)) return;
+  try {
+    await adminApi('deleteAdmin', { username });
+  } catch(e) {
+    alert('刪除失敗：' + e.message); return;
+  }
+  renderAccountList();
+}
+async function changeMyPassword() {
+  const oldPassword = document.getElementById('my-old-pass').value;
+  const newPassword = document.getElementById('my-new-pass').value;
+  const newPassword2 = document.getElementById('my-new-pass2').value;
+  const err = document.getElementById('change-pass-err');
+  err.textContent = '';
+  if (!oldPassword) { err.textContent = '請輸入目前密碼。'; return; }
+  if (!PASSWORD_RULE.test(newPassword)) { err.textContent = '新密碼須至少 8 碼，並包含大寫、小寫英文及數字。'; return; }
+  if (newPassword !== newPassword2) { err.textContent = '兩次輸入的新密碼不一致。'; return; }
+  try {
+    await adminApi('changePassword', { oldPassword, newPassword });
+  } catch(e) {
+    err.textContent = e.message; return;
+  }
+  ['my-old-pass','my-new-pass','my-new-pass2'].forEach(id => document.getElementById(id).value = '');
+  alert('密碼已變更。');
+}
+
+// 每個密碼欄位右側加上「顯示密碼」按鈕
+function addPasswordToggles() {
+  document.querySelectorAll('input[type=password]').forEach(input => {
+    const wrap = document.createElement('span');
+    wrap.className = 'pw-wrap';
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pw-toggle';
+    btn.textContent = '👁';
+    btn.title = btn.ariaLabel = '顯示密碼';
+    btn.addEventListener('click', () => {
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.classList.toggle('on', show);
+      btn.title = btn.ariaLabel = show ? '隱藏密碼' : '顯示密碼';
+      input.focus();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+let footerClickCount = 0;
+document.addEventListener('DOMContentLoaded', () => {
+  addPasswordToggles();
+  adminSession = loadSession();
+  // 網址加 ?admin 直接進後台登入畫面，進入後清掉參數
+  if (new URLSearchParams(location.search).has('admin')) {
+    showPage('admin');
+    history.replaceState(null, '', location.pathname);
+  }
+  const trigger = document.getElementById('adminAccessTrigger');
+  if (trigger) {
+    trigger.addEventListener('click', () => {
+      footerClickCount++;
+      if (footerClickCount >= 5) { showPage('admin'); footerClickCount = 0; }
+    });
+  }
+});
+
 updateStepUI(1);
 </script>
 </body>
 </html>
-
