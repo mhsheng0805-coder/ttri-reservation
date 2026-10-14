@@ -944,8 +944,8 @@
               <input type="email" id="sf-email" placeholder="name@ttri.org.tw">
             </div>
             <div class="form-group">
-              <label>分機／電話</label>
-              <input type="text" id="sf-phone" placeholder="例：6007">
+              <label>電話（含分機）</label>
+              <input type="text" id="sf-phone" placeholder="例：02-22670321 分機 6007">
             </div>
             <div class="form-group" style="justify-content:flex-end;">
               <label class="chk-inline"><input type="checkbox" id="sf-auto"> 該場區有新預約時自動通知</label>
@@ -1069,6 +1069,19 @@
     <div class="modal-btns">
       <button class="btn btn-secondary" onclick="document.getElementById('editModal').classList.remove('open')">取消</button>
       <button class="btn btn-primary" id="e-save" onclick="saveEditRes()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="applicantNotifyModal">
+  <div class="modal-box wide">
+    <h3>&#128231; 通知申請人</h3>
+    <p>請選擇信件最後要列出的主要聯絡人，按「開啟郵件」後會用您的郵件程式開啟，可再修改內容後寄出。</p>
+    <div class="res-summary" id="an-summary"></div>
+    <div class="staff-group"><h4>主要聯絡人</h4><div id="an-list"></div></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="document.getElementById('applicantNotifyModal').classList.remove('open')">取消</button>
+      <button class="btn btn-primary" onclick="openApplicantMail()">開啟郵件</button>
     </div>
   </div>
 </div>
@@ -1896,9 +1909,44 @@ function contactLines(site) {
   return `電　話：${c.tel || d.tel || ''}\nE-Mail：${c.email || d.email || ''}`;
 }
 
-function sendNotifyEmail(ref) {
+// 通知申請人：先選這封信的主要聯絡人（場區聯絡窗口或該場區同仁），再開啟郵件程式
+const CONTACT_PICK_KEY = 'ttri_applicant_contact_';
+let _applicantRef = null;
+
+function contactPickGet(site) { try { return localStorage.getItem(CONTACT_PICK_KEY + site) || ''; } catch { return ''; } }
+function contactPickSet(site, v) { try { localStorage.setItem(CONTACT_PICK_KEY + site, v); } catch {} }
+
+async function sendNotifyEmail(ref) {
   const rec = adminCache.find(r => r.ref === ref);
   if (!rec) return;
+  _applicantRef = ref;
+  const site = siteOf(rec);
+  document.getElementById('an-summary').innerHTML =
+    `${siteTag(rec)} <strong>${esc(rec.org)}</strong>（${esc(rec.name)}）→ ${esc(rec.email || '（無 E-Mail）')}`;
+  const list = document.getElementById('an-list');
+  list.innerHTML = '<p class="muted" style="padding:8px 0;">載入同仁名單…</p>';
+  document.getElementById('applicantNotifyModal').classList.add('open');
+  try { await fetchStaff(); } catch(e) { /* 讀不到同仁名單時，仍可選場區聯絡窗口 */ }
+  const c = siteContacts[site] || {}, d = siteContacts.tucheng || {};
+  const options = [{ id: 'site', label: `${SITES[site].full} 聯絡窗口`, sub: [c.tel || d.tel, c.email || d.email].filter(Boolean).join('｜') }]
+    .concat(staffCache.filter(x => x.site === site || x.site === 'both').map(x => ({
+      id: x.id, label: x.name + (x.unit ? `（${x.unit}）` : ''), sub: [x.phone, x.email].filter(Boolean).join('｜') })));
+  const picked = options.some(o => o.id === contactPickGet(site)) ? contactPickGet(site) : 'site';
+  list.innerHTML = `<div class="staff-pick">${options.map(o => `
+    <label class="staff-item"><input type="radio" name="an-contact" value="${esc(o.id)}" ${o.id === picked ? 'checked' : ''}>
+      <span>${esc(o.label)}<span class="sub">${esc(o.sub || '（未填電話、E-Mail）')}</span></span></label>`).join('')}</div>`;
+}
+
+function openApplicantMail() {
+  const rec = adminCache.find(r => r.ref === _applicantRef);
+  if (!rec) return;
+  const site = siteOf(rec);
+  const pickedId = (document.querySelector('input[name=an-contact]:checked') || {}).value || 'site';
+  contactPickSet(site, pickedId);
+  const staff = staffCache.find(x => x.id === pickedId);
+  const contactText = staff
+    ? `聯絡人：${staff.name}${staff.unit ? `（${staff.unit}）` : ''}\n電　話：${staff.phone || (siteContacts[site] || {}).tel || siteContacts.tucheng.tel}\nE-Mail：${staff.email}`
+    : `${siteFull(rec)} 聯絡窗口\n${contactLines(site)}`;
   const statusMap = STATUS_ZH;
   const dateDisplay = dateOnly(rec.date).replace(/-/g, '/');
   const subject = `【紡織印象館】參訪預約通知 – 編號 ${rec.ref}`;
@@ -1914,14 +1962,14 @@ function sendNotifyEmail(ref) {
   參觀日期：${dateDisplay}
   參觀時間：${timeLabel(rec)}
   參觀人數：${rec.count} 人
-  交通方式：${transportLabel(rec)}
+  交通方式：${transportLabel(rec) || "（未填）"}
 ${rec.status === 'cancelled' && rec.cancelReason ? `  取消原因：${rec.cancelReason}\n` : ''}──────────────────────────
 
-${siteFull(rec)} 聯絡窗口
-${contactLines(siteOf(rec))}
+${contactText}
 
 財團法人紡織產業綜合研究所 · 紡織印象館`;
   window.open(`mailto:${rec.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+  document.getElementById('applicantNotifyModal').classList.remove('open');
 }
 
 function exportRows() {
