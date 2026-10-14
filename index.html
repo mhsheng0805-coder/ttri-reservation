@@ -331,6 +331,16 @@
     }
     .admin-login h2 { color: var(--primary); margin-bottom: 20px; font-size: 20px; }
     .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    #adminTable { min-width: 960px; }
+    #adminTable th { white-space: nowrap; }
+    #adminTable td.c-ref { white-space: nowrap; font-size: 12px; }
+    #adminTable td.c-org strong { display: block; font-size: 14px; }
+    #adminTable td.c-contact { font-size: 12px; line-height: 1.7; }
+    #adminTable td.c-when { white-space: nowrap; }
+    #adminTable td.c-actions { width: 210px; }
+    .muted { color: var(--text-muted); }
+    .contact-grid { display: grid; grid-template-columns: 110px 1fr 1.2fr; gap: 10px; align-items: center; margin-bottom: 10px; }
+    @media (max-width: 760px) { .contact-grid { grid-template-columns: 1fr; } }
     .admin-table th {
       background: var(--primary); color: #fff;
       padding: 10px 12px; text-align: left; font-size: 12px;
@@ -860,8 +870,8 @@
               <thead>
                 <tr>
                   <th style="width:36px;"><input type="checkbox" id="chk-all" onclick="toggleAllCheckbox(this)" title="全選"></th>
-                  <th>預約編號</th><th>場區</th><th>申請單位</th><th>聯絡人</th><th>電話／手機</th><th>Email</th>
-                  <th>參觀日期</th><th>時間</th><th>人數</th><th>狀態</th><th>審核 / 通知</th>
+                  <th>預約編號</th><th>場區</th><th>申請單位／聯絡人</th><th>聯絡方式</th>
+                  <th>參觀日期／時間</th><th>人數</th><th>狀態</th><th>操作</th>
                 </tr>
               </thead>
               <tbody id="adminTableBody"></tbody>
@@ -871,6 +881,20 @@
       </div>
 
       <div id="admin-tab-staff" style="display:none;">
+        <div class="card">
+          <div class="card-title"><span class="icon">&#9742;</span>場區聯絡窗口</div>
+          <p class="hint" style="margin-bottom:14px;">按「&#128231; 通知申請人」寄給申請者的信，以及申請者線上取消的確認信，會帶入該場區的聯絡電話與 E-Mail。斗六場區未填時，會改用土城的聯絡方式。</p>
+          <div class="contact-grid"><strong>土城場區</strong>
+            <input type="text" id="ct-tucheng-tel" placeholder="電話，例：02-22670321 分機 6007">
+            <input type="email" id="ct-tucheng-email" placeholder="E-Mail"></div>
+          <div class="contact-grid"><strong>斗六場區</strong>
+            <input type="text" id="ct-douliu-tel" placeholder="電話，例：05-5574000 分機 0000">
+            <input type="email" id="ct-douliu-email" placeholder="E-Mail"></div>
+          <div class="field-error" id="ct-err"></div>
+          <div class="btn-row" style="margin-top:8px;">
+            <button class="btn btn-primary" id="btn-save-contacts" onclick="saveContacts()" style="font-size:13px;">儲存聯絡窗口</button>
+          </div>
+        </div>
         <div class="card">
           <div class="card-title"><span class="icon">&#128101;</span>紡織所同仁名單</div>
           <div class="alert alert-info" style="margin-bottom:18px;">
@@ -1689,18 +1713,19 @@ function switchAdminTab(tab) {
     document.getElementById('tab-' + t).className = 'btn ' + (t === tab ? 'btn-primary' : 'btn-secondary');
   });
   if (tab === 'reservations') loadAdminData();
-  if (tab === 'staff') loadStaff();
+  if (tab === 'staff') { loadContacts(); loadStaff(); }
   if (tab === 'accounts') renderAccountList();
 }
 
 // ── Admin: 預約管理 ───────────────────────────────────────────────────────────
-const ADMIN_COLS = 12;
+const ADMIN_COLS = 9;
 async function loadAdminData() {
   const tbody = document.getElementById('adminTableBody');
   tbody.innerHTML = `<tr><td colspan="${ADMIN_COLS}" style="text-align:center;padding:24px;">載入中…</td></tr>`;
   try {
     const data = await adminApi('list');
     adminCache = data.records;
+    if (data.contacts) siteContacts = data.contacts;
     renderAdminStats();
     renderAdminTable();
   } catch(e) {
@@ -1760,17 +1785,14 @@ function renderAdminTable() {
   tbody.innerHTML = all.map(r => `
     <tr>
       <td><input type="checkbox" class="row-chk" value="${esc(r.ref)}" onchange="updateDeleteBtn()"></td>
-      <td style="font-size:11px;letter-spacing:0.5px">${esc(r.ref)}</td>
+      <td class="c-ref">${esc(r.ref)}</td>
       <td>${siteTag(r)}</td>
-      <td>${esc(r.org)}</td>
-      <td>${esc(r.name)}</td>
-      <td style="white-space:nowrap;">${[telLabel(r), r.mobile].filter(Boolean).map(esc).join('<br>')}</td>
-      <td style="font-size:12px;">${esc(r.email)}</td>
-      <td>${esc(dateOnly(r.date))}</td>
-      <td style="white-space:nowrap;">${esc(timeLabel(r))}</td>
+      <td class="c-org"><strong>${esc(r.org)}</strong><span class="muted">${esc(r.name)}</span></td>
+      <td class="c-contact">${[telLabel(r) && '☎ ' + telLabel(r), r.mobile && '📱 ' + r.mobile, r.email && '✉ ' + r.email].filter(Boolean).map(esc).join('<br>')}</td>
+      <td class="c-when">${esc(dateOnly(r.date))}<br><span class="muted">${esc(timeLabel(r))}</span></td>
       <td>${esc(r.count)}</td>
       <td><span class="status-badge status-${esc(r.status)}">${statusLabel[r.status] || esc(r.status)}</span></td>
-      <td>
+      <td class="c-actions">
         <div class="action-btns">
           ${r.status === 'pending' ? `<button class="btn-confirm" onclick="confirmRes('${esc(r.ref)}')">&#9989; 確認</button>` : ''}
           ${r.status === 'confirmed' ? `<button class="btn-close" onclick="closeRes('${esc(r.ref)}')" title="參訪完成，結案">&#127937; 結案</button>` : ''}
@@ -1867,6 +1889,13 @@ function closeCancelModal() {
   document.getElementById('cancelModal').classList.remove('open');
 }
 
+// 各場區聯絡窗口（後台「同仁名單」頁設定）；未設定時用土城（總所）的聯絡方式
+let siteContacts = { tucheng: { tel: '02-22670321 分機 6007', email: 'service@ttri.org.tw' }, douliu: { tel: '', email: '' } };
+function contactLines(site) {
+  const c = siteContacts[site] || {}, d = siteContacts.tucheng || {};
+  return `電　話：${c.tel || d.tel || ''}\nE-Mail：${c.email || d.email || ''}`;
+}
+
 function sendNotifyEmail(ref) {
   const rec = adminCache.find(r => r.ref === ref);
   if (!rec) return;
@@ -1888,8 +1917,8 @@ function sendNotifyEmail(ref) {
   交通方式：${transportLabel(rec)}
 ${rec.status === 'cancelled' && rec.cancelReason ? `  取消原因：${rec.cancelReason}\n` : ''}──────────────────────────
 
-電　話：02-22670321 分機 6007
-E-Mail：service@ttri.org.tw
+${siteFull(rec)} 聯絡窗口
+${contactLines(siteOf(rec))}
 
 財團法人紡織產業綜合研究所 · 紡織印象館`;
   window.open(`mailto:${rec.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
@@ -1980,6 +2009,38 @@ function staffSiteTag(s) { return `<span class="site-tag site-${esc(s.site)}">${
 async function fetchStaff() {
   staffCache = (await adminApi('listStaff')).staff;
   return staffCache;
+}
+
+async function loadContacts() {
+  try {
+    siteContacts = (await adminApi('getContacts')).contacts;
+  } catch(e) { return; }
+  Object.keys(SITES).forEach(site => {
+    document.getElementById(`ct-${site}-tel`).value = (siteContacts[site] && siteContacts[site].tel) || '';
+    document.getElementById(`ct-${site}-email`).value = (siteContacts[site] && siteContacts[site].email) || '';
+  });
+}
+
+async function saveContacts() {
+  const contacts = {};
+  Object.keys(SITES).forEach(site => {
+    contacts[site] = { tel: document.getElementById(`ct-${site}-tel`).value.trim(),
+                       email: document.getElementById(`ct-${site}-email`).value.trim() };
+  });
+  const err = document.getElementById('ct-err'), btn = document.getElementById('btn-save-contacts');
+  err.textContent = '';
+  for (const site of Object.keys(SITES)) {
+    if (contacts[site].email && !EMAIL_RE.test(contacts[site].email)) { err.textContent = `${SITES[site].label} 的 E-Mail 格式不正確。`; return; }
+  }
+  btn.disabled = true; btn.textContent = '儲存中…';
+  try {
+    siteContacts = (await adminApi('saveContacts', { contacts })).contacts;
+    alert('場區聯絡窗口已儲存。');
+  } catch(e) {
+    err.textContent = '儲存失敗：' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = '儲存聯絡窗口';
+  }
 }
 
 async function loadStaff() {
