@@ -1739,6 +1739,14 @@ async function loadAdminData() {
     const data = await adminApi('list');
     adminCache = data.records;
     if (data.contacts) siteContacts = data.contacts;
+    if (data.renamed && data.renamed.length) {
+      alert('發現舊系統產生的重複預約編號，已自動修正：\n\n' +
+        data.renamed.map(x => {
+          const r = adminCache.find(y => y.ref === x.to);
+          return `${x.from} → ${x.to}${r ? `（${r.org}，${dateOnly(r.date)}）` : ''}`;
+        }).join('\n') +
+        '\n\n如需告知申請人新編號，可使用「通知申請人」。');
+    }
     renderAdminStats();
     renderAdminTable();
   } catch(e) {
